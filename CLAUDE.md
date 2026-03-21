@@ -67,14 +67,12 @@ WSL2 では `/mnt/c/` 以下の Windows バイナリも PATH に現れる。
 `command -v claude` や `command -v gemini` で既インストール確認すると Windows 側のバイナリを誤検知するため、
 `~/.local/bin/claude` の**ファイル存在確認**で判定する。
 
-### Git が ssh.exe を使う理由
-WSL2 上の Linux ネイティブ ssh では Windows 側の 1Password SSH Agent に直接アクセスできない。
-`core.sshCommand = "ssh.exe"` により Windows SSH バイナリ経由でエージェントを利用する。
-
 ### npiperelay ブリッジの役割
-Linux ネイティブ ssh（`ssh.exe` エイリアス経由でない場合）や `op` CLI など、
-`SSH_AUTH_SOCK` を参照するツールが 1Password SSH Agent を使えるようにするためのブリッジ。
+Linux ネイティブ ssh や `op` CLI など `SSH_AUTH_SOCK` を参照するツールが
+1Password SSH Agent を使えるようにするためのブリッジ。
 インストール先は `~/.local/bin/npiperelay.exe`。
+これにより `ssh.exe` エイリアスは不要となり、`~/.ssh/config`（home-manager 管理）が
+すべての SSH 接続に適用される。Git も `core.sshCommand` を設定せず Linux ssh を使用する。
 - Windows 側: `\\.\pipe\openssh-ssh-agent`（1Password が提供）
 - Linux 側: `/tmp/ssh-agent-1p.sock`（`$SSH_AUTH_SOCK` に設定）
 
