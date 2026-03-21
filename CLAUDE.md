@@ -25,6 +25,9 @@ home/
   git.nix              # programs.git（ssh.exe 連携含む）
   ssh.nix              # programs.ssh（全 Host ブロック）
   wsl.nix              # WSL2 固有設定（npiperelay ブリッジ・PATH）
+  claude.nix           # ~/.claude/skills のシンボリックリンク管理
+claude/
+  skills/              # Claude Code スキルファイル（通常形式で管理）
 scripts/
   bootstrap.sh              # 新規マシン初回セットアップスクリプト
   export-ssh-keys.sh        # 1Password から SSH 公開鍵を一括エクスポート

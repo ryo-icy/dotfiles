@@ -6,6 +6,7 @@
     ./starship.nix
     ./ssh.nix
     ./wsl.nix
+    ./claude.nix
   ];
 
   home.username = "ryosh";
