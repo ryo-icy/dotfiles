@@ -12,5 +12,10 @@
     };
 
     # NVM initialization removed — Node.js is managed by Nix (see packages.nix)
+
+    initContent = ''
+      # kubectl オートコンプリート
+      source <(kubectl completion zsh)
+    '';
   };
 }

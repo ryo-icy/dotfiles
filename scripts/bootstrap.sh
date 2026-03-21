@@ -35,6 +35,8 @@ units=(
   "06-claude.sh"
   "07-gemini.sh"
   "08-ssh-keys.sh"
+  "09-chsh.sh"
+  "10-kubeconfig.sh"
 )
 
 total=${#units[@]}

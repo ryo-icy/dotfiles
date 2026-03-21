@@ -4,51 +4,14 @@
   programs.starship = {
     enable = true;
     settings = {
-      format = ''
-[░▒▓](#a3aed2)\
-$os\
-[](bg:#769ff0 fg:#a3aed2)\
-$directory\
-[](fg:#769ff0 bg:#394260)\
-$git_branch\
-$git_status\
-[](fg:#394260 bg:#212736)\
-$nodejs\
-$rust\
-$golang\
-$php\
-[ ](fg:#212736 bg:#1d2230)\
-[ ](fg:#1d2230)\
-${""}
-$character'';
+      format = "[░▒](#a3aed2)$username[ ](bg:#769ff0 fg:#a3aed2)$directory[ ](fg:#769ff0 bg:#394260)$git_branch$git_status[ ](fg:#394260)\n$character";
 
-      os = {
-        disabled = false;
-        style = "bg:#a3aed2 fg:#090c0c";
-        symbols = {
-          Windows           = "󰍲";
-          Ubuntu            = " 󰕈 ";
-          SUSE              = "";
-          Raspbian          = "󰐿";
-          Mint              = "󰣭";
-          Macos             = "󰀵";
-          Manjaro           = "";
-          Linux             = "󰌽";
-          Gentoo            = "󰣨";
-          Fedora            = "󰣛";
-          Alpine            = "";
-          Amazon            = "";
-          Android           = "";
-          AOSC              = "";
-          Arch              = "󰣇";
-          Artix             = "󰣇";
-          EndeavourOS       = "";
-          CentOS            = "";
-          Debian            = "󰣚";
-          Redhat            = "󱄛";
-          RedHatEnterprise  = "󱄛";
-          Pop               = "";
-        };
+      username = {
+        show_always = true;
+        style_user  = "bg:#a3aed2";
+        style_root  = "bg:#a3aed2";
+        format      = "[ $user ]($style)";
+        disabled    = false;
       };
 
       directory = {
@@ -73,37 +36,6 @@ $character'';
       git_status = {
         style  = "bg:#394260";
         format = "[[($all_status$ahead_behind )](fg:#769ff0 bg:#394260)]($style)";
-      };
-
-      nodejs = {
-        symbol = "";
-        style  = "bg:#212736";
-        format = "[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)";
-      };
-
-      rust = {
-        symbol = "";
-        style  = "bg:#212736";
-        format = "[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)";
-      };
-
-      golang = {
-        symbol = "";
-        style  = "bg:#212736";
-        format = "[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)";
-      };
-
-      php = {
-        symbol = "";
-        style  = "bg:#212736";
-        format = "[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)";
-      };
-
-      time = {
-        disabled    = false;
-        time_format = "%R";
-        style       = "bg:#1d2230";
-        format      = "[[  $time ](fg:#a0a9cb bg:#1d2230)]($style)";
       };
     };
   };

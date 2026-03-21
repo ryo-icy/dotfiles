@@ -13,9 +13,12 @@ if ! command -v npm &>/dev/null; then
   exit 1
 fi
 
-if command -v gemini &>/dev/null; then
-  echo "  Already installed: $(gemini --version 2>/dev/null || echo 'version unknown')"
+NPM_PREFIX="$HOME/.local"
+export PATH="$NPM_PREFIX/bin:$PATH"
+
+if [[ -f "$NPM_PREFIX/bin/gemini" ]]; then
+  echo "  Already installed: $("$NPM_PREFIX/bin/gemini" --version 2>/dev/null || echo 'version unknown')"
 else
-  npm install -g @google/gemini-cli
-  echo "  Installed: $(gemini --version 2>/dev/null || echo 'ok')"
+  npm install -g --prefix "$NPM_PREFIX" @google/gemini-cli
+  echo "  Installed: $("$NPM_PREFIX/bin/gemini" --version 2>/dev/null || echo 'ok')"
 fi

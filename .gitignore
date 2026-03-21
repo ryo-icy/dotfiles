@@ -2,3 +2,4 @@ result
 result-*
 .claude/
 .claude.json
+flake.lock

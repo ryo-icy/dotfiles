@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# 1Password から SSH 公開鍵をエクスポートする
-# export-ssh-keys.sh のラッパー。単独実行可能。
+# 1Password から kubeconfig をエクスポートする
+# export-kubeconfig.sh のラッパー。単独実行可能。
 
 set -euo pipefail
 
@@ -19,4 +19,4 @@ if ! op whoami &>/dev/null; then
   eval "$(op signin)"
 fi
 
-bash "$DOTFILES_DIR/scripts/export-ssh-keys.sh"
+bash "$DOTFILES_DIR/scripts/export-kubeconfig.sh"

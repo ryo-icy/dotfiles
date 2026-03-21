@@ -20,14 +20,26 @@ flake.nix              # nixpkgs + home-manager の入力定義
 home/
   default.nix          # ルートモジュール（username, homeDirectory, stateVersion）
   packages.nix         # home.packages（Nix 管理パッケージ）
-  shell.nix            # programs.zsh（プラグイン・エイリアス）
+  shell.nix            # programs.zsh（プラグイン・エイリアス・補完）
   starship.nix         # programs.starship（プロンプト設定）
   git.nix              # programs.git（ssh.exe 連携含む）
   ssh.nix              # programs.ssh（全 Host ブロック）
   wsl.nix              # WSL2 固有設定（npiperelay ブリッジ・PATH）
 scripts/
-  bootstrap.sh         # 新規マシン初回セットアップスクリプト
-  export-ssh-keys.sh   # 1Password から SSH 公開鍵を一括エクスポート
+  bootstrap.sh              # 新規マシン初回セットアップスクリプト
+  export-ssh-keys.sh        # 1Password から SSH 公開鍵を一括エクスポート
+  export-kubeconfig.sh      # 1Password から kubeconfig をエクスポート
+  units/
+    01-backup.sh            # 既存 dotfile のバックアップ
+    02-docker.sh            # Docker Engine のインストール
+    03-nix.sh               # Nix のインストール
+    04-npiperelay.sh        # npiperelay.exe のダウンロード（~/.local/bin/）
+    05-home-manager.sh      # home-manager switch の実行
+    06-claude.sh            # Claude CLI のインストール（~/.local/bin/）
+    07-gemini.sh            # Gemini CLI のインストール（~/.local/bin/）
+    08-ssh-keys.sh          # SSH 公開鍵のエクスポート
+    09-chsh.sh              # デフォルトシェルを zsh に変更
+    10-kubeconfig.sh        # kubeconfig のエクスポート
 ```
 
 ## 重要な設計判断
@@ -40,11 +52,20 @@ scripts/
 
 以下のツールは `scripts/bootstrap.sh` でインストールし、Nix では管理しない。
 
-| ツール | インストール方法 | Nix 管理外の理由 |
+| ツール | インストール先 | Nix 管理外の理由 |
 |---|---|---|
-| Claude CLI | `npm install -g @anthropic-ai/claude-code` | auto-updater が Nix ストアの read-only を破壊するため |
-| Gemini CLI | `npm install -g @google/gemini-cli` | Claude CLI と同様の理由 |
+| Claude CLI | `~/.local/bin/` (`npm --prefix ~/.local`) | auto-updater が Nix ストアの read-only を破壊するため |
+| Gemini CLI | `~/.local/bin/` (`npm --prefix ~/.local`) | Claude CLI と同様の理由 |
 | Docker Engine | apt | systemd・cgroup などシステムレベルの設定が必要なため |
+
+### npm install の install 先
+`npm install -g` はデフォルトで Node.js インストール先（Nix ストア）に書き込もうとするが、Nix ストアは read-only のため失敗する。
+`--prefix "$HOME/.local"` を指定して `~/.local/bin/` にインストールする。
+
+### Windows バイナリが PATH に混入する問題
+WSL2 では `/mnt/c/` 以下の Windows バイナリも PATH に現れる。
+`command -v claude` や `command -v gemini` で既インストール確認すると Windows 側のバイナリを誤検知するため、
+`~/.local/bin/claude` の**ファイル存在確認**で判定する。
 
 ### Git が ssh.exe を使う理由
 WSL2 上の Linux ネイティブ ssh では Windows 側の 1Password SSH Agent に直接アクセスできない。
@@ -53,8 +74,18 @@ WSL2 上の Linux ネイティブ ssh では Windows 側の 1Password SSH Agent 
 ### npiperelay ブリッジの役割
 Linux ネイティブ ssh（`ssh.exe` エイリアス経由でない場合）や `op` CLI など、
 `SSH_AUTH_SOCK` を参照するツールが 1Password SSH Agent を使えるようにするためのブリッジ。
+インストール先は `~/.local/bin/npiperelay.exe`。
 - Windows 側: `\\.\pipe\openssh-ssh-agent`（1Password が提供）
 - Linux 側: `/tmp/ssh-agent-1p.sock`（`$SSH_AUTH_SOCK` に設定）
+
+### kubeconfig の管理
+kubeconfig にはシークレット情報が含まれるため、リポジトリには含めない。
+1Password にドキュメントタイプで保存し、`scripts/export-kubeconfig.sh` で `~/.kube/config` にエクスポートする。
+
+### starship format 文字列の書き方
+Nix `''` (indented) 文字列では `\` はエスケープ処理されずリテラルになる。
+行末の `\` + 改行が starship の設定ファイルに `\<改行>` として書き込まれ、starship がパースエラーを起こす。
+starship の format は Nix `"..."` (double-quoted) 文字列で1行に書き、改行が必要な箇所には `\n` を使う。
 
 ## 設定変更の手順
 
@@ -70,10 +101,6 @@ home-manager switch --flake ".#ryosh"
 
 SSH 公開鍵は `~/.ssh/imported_keys/` に置かれ、リポジトリには含まない。
 秘密鍵は 1Password で管理し、ファイルには保存しない。
-
-`home/ssh.nix` の `identityFile` パスは 1Password アイテム名に対応している:
-- `github.com` アイテム → `~/.ssh/imported_keys/github.com.pub`
-- `rouzinkai` アイテム → `~/.ssh/imported_keys/rouzinkai.pub`
 
 新しいキーを追加する際は:
 1. 1Password にキーを保存し `dotfiles` タグを付ける

@@ -13,9 +13,12 @@ if ! command -v npm &>/dev/null; then
   exit 1
 fi
 
-if command -v claude &>/dev/null; then
-  echo "  Already installed: $(claude --version 2>/dev/null || echo 'version unknown')"
+NPM_PREFIX="$HOME/.local"
+export PATH="$NPM_PREFIX/bin:$PATH"
+
+if [[ -f "$NPM_PREFIX/bin/claude" ]]; then
+  echo "  Already installed: $("$NPM_PREFIX/bin/claude" --version 2>/dev/null || echo 'version unknown')"
 else
-  npm install -g @anthropic-ai/claude-code
-  echo "  Installed: $(claude --version 2>/dev/null || echo 'ok')"
+  npm install -g --prefix "$NPM_PREFIX" @anthropic-ai/claude-code
+  echo "  Installed: $("$NPM_PREFIX/bin/claude" --version 2>/dev/null || echo 'ok')"
 fi

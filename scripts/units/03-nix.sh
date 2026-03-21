@@ -4,13 +4,18 @@
 
 set -euo pipefail
 
-if command -v nix &>/dev/null; then
-  echo "  Already installed: $(nix --version)"
+if command -v nix &>/dev/null || [ -e /nix/var/nix/profiles/default/bin/nix ]; then
+  echo "  Already installed"
 else
-  curl --proto '=https' --tlsv1.2 -sSf \
-    https://install.determinate.systems/nix | sh -s -- install --no-confirm
-
-  echo "  Installed: $(nix --version)"
+  echo "  Installing Nix (Determinate Systems installer)..."
+  if [ "${CI:-}" = "true" ]; then
+    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
+      | sh -s -- install linux --no-confirm --init none
+  else
+    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
+      | sh -s -- install --no-confirm
+  fi
+  echo "  Installed"
 fi
 
 # Nix を現在のシェルセッションで使えるようにする
