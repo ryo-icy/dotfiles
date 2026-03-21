@@ -79,6 +79,25 @@ cd ~/codes/dotfiles
 home-manager switch --flake ".#ryosh"
 ```
 
+### 依存関係（nixpkgs・home-manager）を更新する
+
+`flake.lock` でリビジョンが固定されているため、明示的に更新操作を行わない限りパッケージバージョンは変わらない。
+
+```bash
+# すべての input を最新に更新
+nix flake update
+
+# 特定の input だけ更新
+nix flake update nixpkgs
+
+# 更新内容を確認してコミット
+git add flake.lock
+git commit -m "chore: nix flake update"
+
+# 反映
+home-manager switch --flake ".#ryosh"
+```
+
 ### 特定のユニットだけ再実行
 
 各ユニットスクリプトは単独でも実行できる。
