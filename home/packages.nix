@@ -1,5 +1,6 @@
 { pkgs, ... }: {
   home.packages = with pkgs; [
+    (import ./ccusage.nix { inherit pkgs; })
     eza
     bat
     socat              # required for 1Password SSH agent bridge in wsl.nix
