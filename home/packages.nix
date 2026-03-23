@@ -1,20 +1,29 @@
 { pkgs, ... }: {
   home.packages = with pkgs; [
-    (import ./ccusage.nix { inherit pkgs; })
-    eza
-    bat
-    socat              # required for 1Password SSH agent bridge in wsl.nix
-    nodejs_22          # replaces NVM
-    _1password-cli     # provides 'op' binary
-    jq                 # export-ssh-keys.sh で JSON パースに使用
+    # シェル・ファイル操作
+    eza                # ls の代替（カラー・Git 情報付き）
+    bat                # cat の代替（シンタックスハイライト付き）
+
+    # データ処理・ユーティリティ
+    jq                 # JSON パーサ・クエリツール
+    (import ./ccusage.nix { inherit pkgs; })  # Claude API 使用量確認ツール
+
+    # 認証・セキュリティ
+    socat              # WSL2 で 1Password SSH エージェントブリッジに必要（wsl.nix 参照）
+    _1password-cli     # 1Password CLI（op コマンド）
+
+    # 開発ツール
+    nodejs_22          # Node.js ランタイム（NVM の代替）
+    gh                 # GitHub CLI
+
+    # インフラ・クラウド
     kubectl            # Kubernetes クラスタ操作
 
-    # ネットワークトラブルシューティング
-    nmap               # ポートスキャン・ネットワーク探索
-    nettools           # ifconfig, netstat, route など
-    dnsutils           # dig, nslookup
-    traceroute         # ルート追跡
-    wget               # HTTP ダウンロード
-    # claude CLI is NOT managed here — its auto-updater requires a writable path
+    # ネットワーク診断・通信
+    wget               # ファイルダウンロード
+    nmap               # ネットワークスキャン
+    nettools           # ifconfig・netstat など基本ネットワークツール
+    dnsutils           # dig・nslookup など DNS 調査ツール
+    traceroute         # 経路追跡ツール
   ];
 }
