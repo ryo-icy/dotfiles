@@ -43,6 +43,7 @@ scripts/
     08-ssh-keys.sh          # SSH 公開鍵のエクスポート
     09-chsh.sh              # デフォルトシェルを zsh に変更
     10-kubeconfig.sh        # kubeconfig のエクスポート
+    11-difit.sh             # difit のインストール（~/.local/bin/）
 ```
 
 ## 重要な設計判断
@@ -59,6 +60,7 @@ scripts/
 |---|---|---|
 | Claude CLI | `~/.local/bin/` (`npm --prefix ~/.local`) | auto-updater が Nix ストアの read-only を破壊するため |
 | Gemini CLI | `~/.local/bin/` (`npm --prefix ~/.local`) | Claude CLI と同様の理由 |
+| difit | `~/.local/bin/` (`npm --prefix ~/.local`) | nixpkgs に未収録のため |
 | Docker Engine | apt | systemd・cgroup などシステムレベルの設定が必要なため |
 
 ### npm install の install 先
