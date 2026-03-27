@@ -105,7 +105,7 @@ EOF
 )"
 ```
 
-4. 作成されたPRのURLをユーザーに伝える
+4. 作成されたPRのURLを `https://` 形式でユーザーに伝える（例: `https://github.com/<owner>/<repo>/pull/<number>`）
 
 ## 注意事項
 
