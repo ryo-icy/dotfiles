@@ -61,7 +61,6 @@ scripts/
 | Claude CLI | `~/.local/bin/` (`npm --prefix ~/.local`) | auto-updater が Nix ストアの read-only を破壊するため |
 | Gemini CLI | `~/.local/bin/` (`npm --prefix ~/.local`) | Claude CLI と同様の理由 |
 | difit | `~/.local/bin/` (`npm --prefix ~/.local`) | nixpkgs に未収録のため |
-| vibe-kanban | `~/.local/bin/` (`npm --prefix ~/.local`) | 初回実行時に Rust バイナリを `~/.vibe-kanban/bin/` へダウンロードするため Nix 管理不可 |
 | Docker Engine | apt | systemd・cgroup などシステムレベルの設定が必要なため |
 
 ### npm install の install 先
