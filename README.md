@@ -43,7 +43,7 @@ dotfiles/
 | `~/.ssh/config` | `home/ssh.nix` |
 
 **Nix 管理外**（bootstrap.sh でインストール）:
-- Claude CLI — npm (`@anthropic-ai/claude-code`)、auto-updater のため Nix 管理外
+- Claude CLI — 公式ネイティブインストーラー、auto-updater のため Nix 管理外
 - Gemini CLI — npm (`@google/gemini-cli`)
 - Docker Engine — apt、システムレベルの設定が必要なため Nix 管理外
 - `~/.ssh/imported_keys/` — SSH 公開鍵（1Password からエクスポート、リポジトリ外）

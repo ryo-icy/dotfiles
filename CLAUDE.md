@@ -58,7 +58,7 @@ scripts/
 
 | ツール | インストール先 | Nix 管理外の理由 |
 |---|---|---|
-| Claude CLI | `~/.local/bin/` (`npm --prefix ~/.local`) | auto-updater が Nix ストアの read-only を破壊するため |
+| Claude CLI | `~/.local/bin/` (公式ネイティブインストーラー) | auto-updater が Nix ストアの read-only を破壊するため |
 | Gemini CLI | `~/.local/bin/` (`npm --prefix ~/.local`) | Claude CLI と同様の理由 |
 | difit | `~/.local/bin/` (`npm --prefix ~/.local`) | nixpkgs に未収録のため |
 | Docker Engine | apt | systemd・cgroup などシステムレベルの設定が必要なため |
