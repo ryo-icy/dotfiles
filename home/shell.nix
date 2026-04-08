@@ -23,7 +23,6 @@
       ccus = "ccusage session";
 
       # npm -g は Nix ストア（read-only）に書き込むため --prefix を必須とする
-      update-claude = "npm install -g @anthropic-ai/claude-code --prefix \"$HOME/.local\"";
       update-gemini = "npm install -g @google/gemini-cli --prefix \"$HOME/.local\"";
     };
 
