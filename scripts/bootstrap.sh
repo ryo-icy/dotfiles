@@ -38,6 +38,7 @@ units=(
   "09-chsh.sh"
   "10-kubeconfig.sh"
   "11-difit.sh"
+  "12-vibe-kanban.sh"
 )
 
 total=${#units[@]}
@@ -57,4 +58,5 @@ echo "  2. 1Password Agent 確認:   ssh-add.exe -l"
 echo "  3. Docker 確認:            docker run hello-world"
 echo "  4. Claude CLI 確認:        claude --version"
 echo "  5. Gemini CLI 確認:        gemini --version"
-echo "  6. 鍵エクスポートが失敗した場合: op signin && bash scripts/units/08-ssh-keys.sh"
+echo "  6. vibe-kanban 起動:       vibe-kanban (初回はRustバイナリをDL)"
+echo "  7. 鍵エクスポートが失敗した場合: op signin && bash scripts/units/08-ssh-keys.sh"
