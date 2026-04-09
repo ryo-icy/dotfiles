@@ -2,6 +2,7 @@
 
 let
   pname = "openclaw";
+  # renovate: datasource=npm depName=openclaw
   version = "2026.4.9";
 
   # 1. ビルド済み成果物を含む NPM tarball
