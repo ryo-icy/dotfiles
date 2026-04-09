@@ -26,6 +26,7 @@ home/
   ssh.nix              # programs.ssh（全 Host ブロック）
   wsl.nix              # WSL2 固有設定（npiperelay ブリッジ・PATH）
   claude.nix           # ~/.claude/skills のシンボリックリンク管理
+  pkgs/                # カスタムパッケージ定義 (difit, ccusage, openclaw)
 claude/
   skills/              # Claude Code スキルファイル（通常形式で管理）
 scripts/
@@ -43,7 +44,6 @@ scripts/
     08-ssh-keys.sh          # SSH 公開鍵のエクスポート
     09-chsh.sh              # デフォルトシェルを zsh に変更
     10-kubeconfig.sh        # kubeconfig のエクスポート
-    11-difit.sh             # difit のインストール（~/.local/bin/）
 ```
 
 ## 重要な設計判断
@@ -51,6 +51,14 @@ scripts/
 ### home.stateVersion
 `home/default.nix` の `home.stateVersion` は初回 `home-manager switch` 時のバージョンを設定し、**以後絶対に変更しない**。
 パッケージバージョンではなく home-manager の状態マイグレーション挙動を制御するものであるため。
+
+### Nix 管理のカスタムパッケージ (NPM系)
+`difit`, `ccusage`, `openclaw` などの nixpkgs 未収録ツールは、`home/pkgs/` 以下の個別の Nix ファイルで定義し、ソースからビルドする。これにより、NPM ツールのバージョンと依存関係を Nix で宣言的に管理する。
+
+#### ビルド時の注意点
+- **ネットワーク制限**: Nix サンドボックス内ではネットワークアクセスが禁止されているため、`pnpm run build` が内部で外部 API やスキーマ（LiteLLM 等）をフェッチしようとする場合、ビルドが失敗する。
+- **直接実行の推奨**: `ccusage` のようにビルドスクリプトが複雑な場合は、`pnpm run build` 全体ではなく、`tsdown` などのモジュールバンドラーを `node_modules` から直接実行して最小限の成果物のみを生成する。
+- **シンボリックリンクの掃除**: PNPM が作成する `node_modules` 内の壊れたシンボリックリンクは、Nix のビルド成果物スキャンでエラーを引き起こすため、`find -xtype l -delete` で削除する必要がある。
 
 ### Nix 管理外のツール
 
@@ -60,7 +68,6 @@ scripts/
 |---|---|---|
 | Claude CLI | `~/.local/bin/` (公式ネイティブインストーラー) | auto-updater が Nix ストアの read-only を破壊するため |
 | Gemini CLI | `~/.local/bin/` (`npm --prefix ~/.local`) | Claude CLI と同様の理由 |
-| difit | `~/.local/bin/` (`npm --prefix ~/.local`) | nixpkgs に未収録のため |
 | Docker Engine | apt | systemd・cgroup などシステムレベルの設定が必要なため |
 
 ### npm install の install 先

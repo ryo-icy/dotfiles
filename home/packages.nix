@@ -6,14 +6,16 @@
 
     # データ処理・ユーティリティ
     jq                 # JSON パーサ・クエリツール
-    (import ./ccusage.nix { inherit pkgs; })  # Claude API 使用量確認ツール
+    (import ./pkgs/ccusage.nix { inherit pkgs; })  # Claude API 使用量確認ツール
 
     # 認証・セキュリティ
     socat              # WSL2 で 1Password SSH エージェントブリッジに必要（wsl.nix 参照）
     _1password-cli     # 1Password CLI（op コマンド）
 
     # 開発ツール
-    nodejs_22          # Node.js ランタイム（NVM の代替）
+    nodejs_24          # Node.js ランタイム（NVM の代替）
+    (import ./pkgs/difit.nix { inherit pkgs; })    # Git 差分ビューア
+    (import ./pkgs/openclaw.nix { inherit pkgs; }) # AI エージェント CLI
     gh                 # GitHub CLI
 
     # インフラ・クラウド
