@@ -5,6 +5,7 @@
 
 set -euo pipefail
 
+# renovate: datasource=github-releases depName=jstarks/npiperelay
 NPIPE_VERSION="v0.1.0"
 NPIPE_URL="https://github.com/jstarks/npiperelay/releases/download/${NPIPE_VERSION}/npiperelay_windows_amd64.zip"
 NPIPE_DEST="$HOME/.local/bin/npiperelay.exe"

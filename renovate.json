@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "reviewers": [
+    "ryo-icy"
+  ],
+  "minimumReleaseAge": "3 days",
+  "nix": {
+    "enabled": true
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "\\.nix$",
+        "\\.sh$"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?\\s+.*?(?:version|VERSION)\\s*=\\s*\"(?<currentValue>[^\"]+)\""
+      ]
+    }
+  ]
+}
