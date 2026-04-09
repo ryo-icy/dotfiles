@@ -3,6 +3,7 @@
   # Public keys are placed at ~/.ssh/imported_keys/ by scripts/export-ssh-keys.sh.
   programs.ssh = {
     enable = true;
+    enableDefaultConfig = false;
 
     matchBlocks = {
       "github.com" = {

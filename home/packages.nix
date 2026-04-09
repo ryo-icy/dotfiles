@@ -17,6 +17,7 @@
     (import ./pkgs/difit.nix { inherit pkgs; })    # Git 差分ビューア
     (import ./pkgs/openclaw.nix { inherit pkgs; }) # AI エージェント CLI
     gh                 # GitHub CLI
+    shellcheck         # シェルスクリプトの静的解析ツール
 
     # インフラ・クラウド
     kubectl            # Kubernetes クラスタ操作
