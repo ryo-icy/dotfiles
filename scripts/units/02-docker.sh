@@ -17,6 +17,7 @@ else
   sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
   # Docker のリポジトリを apt ソースに追加
+  # shellcheck disable=SC1091
   echo \
     "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
     https://download.docker.com/linux/ubuntu \
