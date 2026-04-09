@@ -15,7 +15,8 @@ dotfiles/
 │   ├── starship.nix           # Starship プロンプト設定
 │   ├── git.nix                # Git 設定
 │   ├── ssh.nix                # SSH クライアント設定
-│   └── wsl.nix                # WSL2 固有設定（SSH Agent ブリッジ等）
+│   ├── wsl.nix                # WSL2 固有設定（SSH Agent ブリッジ等）
+│   └── pkgs/                  # カスタムパッケージ定義 (difit, ccusage, openclaw)
 └── scripts/
     ├── bootstrap.sh              # 全ユニットを順番に実行するオーケストレーター
     ├── export-ssh-keys.sh        # 1Password から SSH 公開鍵をエクスポート
@@ -41,6 +42,7 @@ dotfiles/
 | `~/.gitconfig` | `home/git.nix` |
 | `~/.config/starship.toml` | `home/starship.nix` |
 | `~/.ssh/config` | `home/ssh.nix` |
+| `difit`, `ccusage`, `openclaw` | `home/pkgs/*.nix` |
 
 **Nix 管理外**（bootstrap.sh でインストール）:
 - Claude CLI — 公式ネイティブインストーラー、auto-updater のため Nix 管理外
@@ -189,10 +191,13 @@ Nix で管理するパッケージは `home/packages.nix` に記載。
 
 ```nix
 home.packages = with pkgs; [
-  eza bat socat nodejs_22
+  eza bat socat nodejs_24
   _1password-cli jq
   kubectl
   nmap nettools dnsutils traceroute wget
+  (import ./pkgs/ccusage.nix { inherit pkgs; })
+  (import ./pkgs/difit.nix { inherit pkgs; })
+  (import ./pkgs/openclaw.nix { inherit pkgs; })
 ];
 ```
 
