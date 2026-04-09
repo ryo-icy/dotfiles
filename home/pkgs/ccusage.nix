@@ -28,10 +28,14 @@ pkgs.stdenv.mkDerivation {
     pkgs.makeWrapper
   ];
 
+  # pnpm run build は外部ネットワークへのアクセス (スキーマ生成) を伴うため
+  # モジュールバンドラー (tsdown) のみを直接実行して成果物を生成する
   buildPhase = ''
     runHook preBuild
-    # pnpm を使用して該当パッケージのみをビルド (モノレポ構成に対応)
-    pnpm run --filter ccusage build
+    cd apps/ccusage
+    # node_modules 以下のバイナリを直接指定してビルド
+    ../../node_modules/.pnpm/node_modules/.bin/tsdown
+    cd ../..
     runHook postBuild
   '';
 

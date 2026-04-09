@@ -74,6 +74,7 @@ bash scripts/export-kubeconfig.sh
 - **home.stateVersion**: `home/default.nix` に定義。初回設定時から**絶対に変更しない**。
 - **Nix 外管理ツール**: Claude CLI, Gemini CLI, Docker は `bootstrap.sh` で管理する。これらを `home.packages` に追加してはならない。
 - **カスタムパッケージ (NPM系)**: `difit`, `ccusage`, `openclaw` は `home/pkgs/` 以下の個別の Nix ファイルで定義され、ソースからビルドして `home.packages` に追加されている。
+- **NPM ビルドの制約**: Nix サンドボックス内ではネットワークアクセスが禁止されているため、外部フェッチを伴う `pnpm run build` は避け、`tsdown` 等を直接実行して成果物を生成すること。また、`node_modules` 内の壊れたシンボリックリンクは `find -xtype l -delete` で削除すること。
 - **npm install**: Nix ストアは読み取り専用のため、`npm install -g` は失敗する。`--prefix "$HOME/.local"` を使用して `~/.local/bin/` にインストールすること。
 
 ### 1Password SSH Agent ブリッジ
