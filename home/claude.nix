@@ -15,5 +15,9 @@ in {
       source = ../claude/statusline-command.sh;
       executable = true;
     };
+    ".claude/hooks/notify.sh" = {
+      source = ../claude/hooks/notify.sh;
+      executable = true;
+    };
   };
 }
