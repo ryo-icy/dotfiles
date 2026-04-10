@@ -21,6 +21,8 @@
 
     # インフラ・クラウド
     kubectl            # Kubernetes クラスタ操作
+    terraform          # インフラのコードによるプロビジョニングツール
+    tflint             # Terraform 静的解析ツール
 
     # ネットワーク診断・通信
     wget               # ファイルダウンロード
