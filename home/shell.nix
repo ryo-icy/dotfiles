@@ -17,6 +17,9 @@
       greset = "git reset --soft HEAD^";
       greset-all = "git reset --hard HEAD^";
 
+      vi   = "nvim";
+      vim  = "nvim";
+
       # ccusage は Nix 管理のバイナリを直接使用（packages.nix 参照）
       ccu  = "ccusage";
       ccum = "ccusage monthly";

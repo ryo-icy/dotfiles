@@ -13,6 +13,7 @@
     _1password-cli     # 1Password CLI（op コマンド）
 
     # 開発ツール
+    neovim             # モダンな Vim 互換テキストエディタ
     nodejs_24          # Node.js ランタイム（NVM の代替）
     (import ./pkgs/difit.nix { inherit pkgs; })    # Git 差分ビューア
     (import ./pkgs/openclaw.nix { inherit pkgs; }) # AI エージェント CLI
