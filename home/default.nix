@@ -7,6 +7,7 @@
     ./ssh.nix
     ./wsl.nix
     ./claude.nix
+    ./nvim.nix
   ];
 
   home.username = "ryosh";
