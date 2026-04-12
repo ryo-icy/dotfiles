@@ -8,6 +8,8 @@
     ./wsl.nix
     ./claude.nix
     ./nvim.nix
+    ./yazi.nix
+    ./lazygit.nix
   ];
 
   home.username = "ryosh";

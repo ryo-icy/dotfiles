@@ -8,6 +8,7 @@
       ls   = "eza --icons --git";
       ll   = "eza --icons --git -l";
       la   = "eza --icons --git -la";
+      lt   = "eza --icons --git --tree --level=2";
       # bat is the Nix package binary name (apt installs it as batcat)
       cat  = "bat";
 
@@ -16,6 +17,7 @@
       gclean = "git fetch -p && git branch --merged | grep -v '*' | xargs -r git branch -d";
       greset = "git reset --soft HEAD^";
       greset-all = "git reset --hard HEAD^";
+      lg = "lazygit";
 
       vi   = "nvim";
       vim  = "nvim";
@@ -34,6 +36,20 @@
     initContent = ''
       # kubectl オートコンプリート
       source <(kubectl completion zsh)
+
+      # GitHub リポジトリを fzf で選択して ghq でクローン（~/codes 以下）
+      function gclone() {
+        local repo
+        repo=$(gh api --paginate /user/repos --jq '.[].ssh_url' | fzf)
+        [[ -n "$repo" ]] && ghq get "$repo"
+      }
+
+      # ghq 管理のリポジトリを fzf で選択して cd
+      function gcd() {
+        local dir
+        dir=$(ghq list | fzf)
+        [[ -n "$dir" ]] && cd "$(ghq root)/$dir"
+      }
     '';
   };
 }

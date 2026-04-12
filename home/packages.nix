@@ -3,9 +3,15 @@
     # シェル・ファイル操作
     eza                # ls の代替（カラー・Git 情報付き）
     bat                # cat の代替（シンタックスハイライト付き）
+    fzf                # あいまい検索（コマンド履歴・ファイル検索）
+    # yazi は home/yazi.nix で programs.yazi として管理（shell integration のため）
+    zoxide             # スマートな cd コマンド（頻度・最近の履歴で補完）
+    tree               # ディレクトリツリー表示
+    ghq                # リポジトリ管理（go get スタイル）
 
     # データ処理・ユーティリティ
     jq                 # JSON パーサ・クエリツール
+    yq                 # YAML/JSON/TOML パーサ・クエリツール（mikefarah/yq）
     (import ./pkgs/ccusage.nix { inherit pkgs; })  # Claude API 使用量確認ツール
 
     # 認証・セキュリティ
@@ -14,6 +20,9 @@
 
     # 開発ツール
     neovim             # モダンな Vim 互換テキストエディタ
+    delta              # git diff ビューア（シンタックスハイライト・サイドバイサイド）
+    # lazygit は home/lazygit.nix で programs.lazygit として管理（delta 連携のため）
+    btop               # リソースモニタ（CPU・メモリ・ネットワーク）
     nodejs_24          # Node.js ランタイム（NVM の代替）
     (import ./pkgs/difit.nix { inherit pkgs; })    # Git 差分ビューア
     (import ./pkgs/mo.nix { inherit pkgs; })       # Markdown ビューア（ブラウザで開く）
