@@ -24,6 +24,8 @@
     kubectl            # Kubernetes クラスタ操作
     terraform          # インフラのコードによるプロビジョニングツール
     tflint             # Terraform 静的解析ツール
+    google-cloud-sdk   # GCP 操作 CLI（gcloud・gsutil・bq）
+    google-clasp       # Google Apps Script ローカル開発 CLI（clasp）
 
     # ネットワーク診断・通信
     wget               # ファイルダウンロード
