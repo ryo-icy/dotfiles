@@ -1,0 +1,191 @@
+# Claude CLI の設定を同期した Gemini CLI ポリシー
+
+# ==========================================
+# 拒否ルール (Deny) - 優先度 300
+# ==========================================
+
+# シェルコマンド (拒否)
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "rm -rf"
+decision = "deny"
+priority = 300
+denyMessage = "セキュリティ上の理由から、再帰的な削除 (rm -rf) は禁止されています。"
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "sudo"
+decision = "deny"
+priority = 300
+denyMessage = "セキュリティ上の理由から、sudo 権限が必要な操作は禁止されています。"
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "env"
+decision = "deny"
+priority = 300
+denyMessage = "環境変数の表示は禁止されています。"
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "printenv"
+decision = "deny"
+priority = 300
+denyMessage = "環境変数の表示は禁止されています。"
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git reset"
+decision = "deny"
+priority = 300
+denyMessage = "git reset は禁止されています。"
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "rtk git reset"
+decision = "deny"
+priority = 300
+denyMessage = "git reset は禁止されています。"
+
+# 秘密情報の cat 拒否
+[[rule]]
+toolName = "run_shell_command"
+argsPattern = "cat .*\.env.*"
+decision = "deny"
+priority = 301
+
+[[rule]]
+toolName = "run_shell_command"
+argsPattern = "cat ~/.kube/config"
+decision = "deny"
+priority = 301
+
+# 秘密情報の read_file 拒否
+[[rule]]
+toolName = "read_file"
+filePattern = ".*\.env.*"
+decision = "deny"
+priority = 300
+
+[[rule]]
+toolName = "read_file"
+filePattern = "~/.kube/config"
+decision = "deny"
+priority = 300
+
+# 1Password SSH 鍵やシークレット操作の拒否
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "op "
+decision = "deny"
+priority = 300
+
+# ==========================================
+# 承認要求ルール (Ask) - 優先度 200
+# ==========================================
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "rm "
+decision = "ask_user"
+priority = 200
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "wget "
+decision = "ask_user"
+priority = 200
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "curl "
+decision = "ask_user"
+priority = 200
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git push"
+decision = "ask_user"
+priority = 200
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git rm"
+decision = "ask_user"
+priority = 200
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh pr create"
+decision = "ask_user"
+priority = 200
+
+# ==========================================
+# 許可ルール (Allow) - 優先度 100
+# ==========================================
+
+# 参照系・基本操作
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git "
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "gh "
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "ls"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "cat"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "grep"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "find"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "mkdir"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "home-manager"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "nix"
+decision = "allow"
+priority = 100
+
+# 外部情報取得
+[[rule]]
+toolName = "web_fetch"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "google_web_search"
+decision = "allow"
+priority = 100
