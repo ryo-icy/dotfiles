@@ -27,7 +27,6 @@
     nodejs_24          # Node.js ランタイム（NVM の代替）
     (import ./pkgs/difit.nix { inherit pkgs; })    # Git 差分ビューア
     (import ./pkgs/mo.nix { inherit pkgs; })       # Markdown ビューア（ブラウザで開く）
-    (import ./pkgs/openclaw.nix { inherit pkgs; }) # AI エージェント CLI
     gh                 # GitHub CLI
     shellcheck         # シェルスクリプトの静的解析ツール
 
