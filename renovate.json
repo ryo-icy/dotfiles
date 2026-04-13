@@ -8,7 +8,10 @@
   ],
   "minimumReleaseAge": "3 days",
   "nix": {
-    "enabled": true
+    "enabled": false
+  },
+  "lockFileMaintenance": {
+    "enabled": false
   },
   "customManagers": [
     {

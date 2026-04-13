@@ -1,0 +1,102 @@
+name: 'Update Flake Input'
+description: 'Nix flake の単一入力を更新し、リリース経過時間のチェックと PR 作成を行います'
+
+inputs:
+  input-name:
+    description: '更新する入力の名前'
+    required: true
+  minimum-release-age-days:
+    description: 'PR を作成するために必要な最小経過日数'
+    default: '3'
+  auto-merge:
+    description: '自動マージを有効にするか'
+    default: 'true'
+  github-token:
+    description: 'GitHub トークン'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Get current input info
+      id: old-info
+      shell: bash
+      run: |
+        LOCK=$(nix flake metadata --json)
+        NODE_NAME=$(echo "$LOCK" | jq -r ".locks.nodes.root.inputs.\"${{ inputs.input-name }}\"")
+        # NODE_NAME が配列（follows）の場合は空にする
+        if [ "$(echo "$NODE_NAME" | jq 'type')" == "array" ]; then
+          echo "skip=true" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        REV=$(echo "$LOCK" | jq -r ".locks.nodes.\"$NODE_NAME\".locked.rev")
+        REPO=$(echo "$LOCK" | jq -r ".locks.nodes.\"$NODE_NAME\".original | \"\(.owner)/\(.repo)\"")
+        echo "rev=$REV" >> $GITHUB_OUTPUT
+        echo "repo=$REPO" >> $GITHUB_OUTPUT
+
+    - name: Update input
+      if: steps.old-info.outputs.skip != 'true'
+      shell: bash
+      run: nix flake update ${{ inputs.input-name }}
+
+    - name: Get new input info
+      if: steps.old-info.outputs.skip != 'true'
+      id: new-info
+      shell: bash
+      run: |
+        LOCK=$(nix flake metadata --json)
+        NODE_NAME=$(echo "$LOCK" | jq -r ".locks.nodes.root.inputs.\"${{ inputs.input-name }}\"")
+        REV=$(echo "$LOCK" | jq -r ".locks.nodes.\"$NODE_NAME\".locked.rev")
+        echo "rev=$REV" >> $GITHUB_OUTPUT
+        if [ "${{ steps.old-info.outputs.rev }}" == "$REV" ]; then
+          echo "changed=false" >> $GITHUB_OUTPUT
+        else
+          echo "changed=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Check release age
+      if: steps.new-info.outputs.changed == 'true'
+      id: age-check
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        COMMIT_DATE=$(gh api repos/${{ steps.old-info.outputs.repo }}/commits/${{ steps.new-info.outputs.rev }} --jq '.commit.committer.date')
+        COMMIT_TS=$(date -d "$COMMIT_DATE" +%s)
+        NOW_TS=$(date +%s)
+        AGE_DAYS=$(( (NOW_TS - COMMIT_TS) / 86400 ))
+        echo "age=$AGE_DAYS" >> $GITHUB_OUTPUT
+        if [ $AGE_DAYS -lt ${{ inputs.minimum-release-age-days }} ]; then
+          echo "Update is too fresh ($AGE_DAYS days old). Skipping PR."
+          echo "ready=false" >> $GITHUB_OUTPUT
+        else
+          echo "ready=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create Pull Request
+      if: steps.age-check.outputs.ready == 'true'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        BRANCH="update/${{ inputs.input-name }}"
+        git checkout -b "$BRANCH"
+        git add flake.lock
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        
+        TITLE="chore(deps): update ${{ inputs.input-name }}"
+        DIFF_URL="https://github.com/${{ steps.old-info.outputs.repo }}/compare/${{ steps.old-info.outputs.rev }}...${{ steps.new-info.outputs.rev }}"
+        BODY="Update \`${{ inputs.input-name }}\` input.
+        
+        - Diff: $DIFF_URL
+        - Age: ${{ steps.age-check.outputs.age }} days"
+
+        git commit -m "$TITLE"
+        git push -f origin "$BRANCH"
+        
+        gh pr create --title "$TITLE" --body "$BODY" --head "$BRANCH" --base main || gh pr edit "$BRANCH" --title "$TITLE" --body "$BODY"
+        
+        if [ "${{ inputs.auto-merge }}" == "true" ]; then
+          gh pr merge --auto --merge "$BRANCH"
+        fi

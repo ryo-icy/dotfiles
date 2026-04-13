@@ -21,5 +21,26 @@
         inherit pkgs;
         modules = [ ./home/default.nix ];
       };
+
+      apps.${system} = {
+        update = {
+          type = "app";
+          program = toString (pkgs.writeShellScript "flake-update" ''
+            set -e
+            echo "Updating flake.lock..."
+            nix flake update
+            echo "Done! Run 'nix run .#switch' to apply changes."
+          '');
+        };
+        switch = {
+          type = "app";
+          program = toString (pkgs.writeShellScript "home-manager-switch" ''
+            set -e
+            echo "Building and switching to Home Manager configuration..."
+            nix run nixpkgs#home-manager -- switch --flake .#ryosh
+            echo "Done!"
+          '');
+        };
+      };
     };
 }
