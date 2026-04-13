@@ -20,7 +20,7 @@ dotfiles/
 │   ├── nvim.nix               # Neovim 設定
 │   ├── yazi.nix               # Yazi ファイルマネージャ（zsh 統合・zoxide キーバインド）
 │   ├── lazygit.nix            # Lazygit TUI（delta side-by-side 連携）
-│   └── pkgs/                  # カスタムパッケージ定義 (difit, ccusage, openclaw, mo)
+│   └── pkgs/                  # カスタムパッケージ定義 (difit, ccusage, mo)
 ├── config/
 │   ├── claude/                # Claude Code スキルと設定
 │   │   ├── settings.json      # statusLine・Stop/Notification フック設定
@@ -59,7 +59,7 @@ dotfiles/
 | `~/.config/nvim/init.lua` | `home/nvim.nix` |
 | yazi 設定 | `home/yazi.nix` |
 | lazygit 設定 | `home/lazygit.nix` |
-| `difit`, `ccusage`, `openclaw`, `mo` | `home/pkgs/*.nix` |
+| `difit`, `ccusage`, `mo` | `home/pkgs/*.nix` |
 
 **Nix 管理外**（bootstrap.sh でインストール）:
 - Claude CLI — 公式ネイティブインストーラー、auto-updater のため Nix 管理外
@@ -216,7 +216,6 @@ home.packages = with pkgs; [
   (import ./pkgs/ccusage.nix { inherit pkgs; })
   (import ./pkgs/difit.nix { inherit pkgs; })
   (import ./pkgs/mo.nix { inherit pkgs; })
-  (import ./pkgs/openclaw.nix { inherit pkgs; })
 ];
 ```
 

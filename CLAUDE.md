@@ -29,7 +29,7 @@ home/
   nvim.nix             # programs.neovim（config/nvim/init.lua のリンク管理）
   yazi.nix             # programs.yazi（zsh 統合・zoxide キーバインド）
   lazygit.nix          # programs.lazygit（delta side-by-side 連携）
-  pkgs/                # カスタムパッケージ定義 (difit, ccusage, openclaw, mo)
+  pkgs/                # カスタムパッケージ定義 (difit, ccusage, mo)
 config/
   claude/
     skills/            # Claude Code スキルファイル（通常形式で管理）
@@ -63,7 +63,7 @@ scripts/
 パッケージバージョンではなく home-manager の状態マイグレーション挙動を制御するものであるため。
 
 ### Nix 管理のカスタムパッケージ (NPM系)
-`difit`, `ccusage`, `openclaw` などの nixpkgs 未収録ツールは、`home/pkgs/` 以下の個別の Nix ファイルで定義し、ソースからビルドする。これにより、NPM ツールのバージョンと依存関係を Nix で宣言的に管理する。
+`difit`, `ccusage` などの nixpkgs 未収録ツールは、`home/pkgs/` 以下の個別の Nix ファイルで定義し、ソースからビルドする。これにより、NPM ツールのバージョンと依存関係を Nix で宣言的に管理する。
 
 `mo`（Markdown ビューア）は Go バイナリのため npm ビルドは不要。GitHub Releases から linux_amd64 tarball を直接ダウンロードして使用する。
 

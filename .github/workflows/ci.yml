@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
@@ -19,8 +17,8 @@ jobs:
       nix: ${{ steps.filter.outputs.nix }}
       shell: ${{ steps.filter.outputs.shell }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -40,7 +38,7 @@ jobs:
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Run shellcheck
         run: find scripts config -name "*.sh" | xargs shellcheck
 
@@ -50,10 +48,10 @@ jobs:
     if: needs.changes.outputs.nix == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
+        uses: DeterminateSystems/nix-installer-action@v22
 
       # flake.lock のハッシュをキーに Nix ストアをキャッシュ
       - name: Cache Nix store
