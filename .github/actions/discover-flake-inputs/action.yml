@@ -1,0 +1,18 @@
+name: 'Discover Flake Inputs'
+description: 'Nix flake の入力を検出し、並列更新用のマトリックスを作成します'
+
+outputs:
+  matrix:
+    description: '更新対象の入力を含む JSON マトリックス'
+    value: ${{ steps.discover.outputs.matrix }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Discover flake inputs
+      id: discover
+      shell: bash
+      run: |
+        # root の入力を抽出（follows は除く）
+        INPUTS=$(nix flake metadata --json | jq -c '.locks.nodes.root.inputs | with_entries(select(.value | .[0] == .key)) | keys')
+        echo "matrix=$INPUTS" >> $GITHUB_OUTPUT
