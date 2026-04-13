@@ -5,9 +5,12 @@
   "security": {
     "auth": {
       "selectedType": "oauth-personal"
-    }
+    },
+    "enablePermanentToolApproval": true,
+    "disableAlwaysAllow": false
   },
   "general": {
+    "defaultApprovalMode": "default",
     "enableNotifications": true,
     "sessionRetention": {
       "warningAcknowledged": true,

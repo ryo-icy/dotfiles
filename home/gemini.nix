@@ -1,9 +1,14 @@
 { lib, pkgs, ... }: {
-  # notify.sh はシンボリックリンクで管理（実行時に書き込み不要なため）
+  # notify.sh とポリシー設定はシンボリックリンクで管理（実行時に書き込み不要なため）
   home.file = {
     ".gemini/hooks/notify.sh" = {
       source = ../config/gemini/hooks/notify.sh;
       executable = true;
+    };
+    # すべてのポリシーファイルを ~/.gemini/policies/ に配置
+    ".gemini/policies" = {
+      source = ../config/gemini/policies;
+      recursive = true;
     };
   };
 
