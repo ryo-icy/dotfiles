@@ -1,6 +1,19 @@
 {
+  "ide": {
+    "hasSeenNudge": true
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
   "general": {
-    "enableNotifications": true
+    "enableNotifications": true,
+    "sessionRetention": {
+      "warningAcknowledged": true,
+      "enabled": true,
+      "maxAge": "30d"
+    }
   },
   "hooks": {
     "AfterAgent": [
