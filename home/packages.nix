@@ -13,6 +13,7 @@
     jq                 # JSON パーサ・クエリツール
     yq                 # YAML/JSON/TOML パーサ・クエリツール（mikefarah/yq）
     (import ./pkgs/ccusage.nix { inherit pkgs; })  # Claude API 使用量確認ツール
+    (import ./pkgs/rtk.nix { inherit pkgs; })     # Claude Code トークン削減プロキシ（60-90% 削減）
 
     # 認証・セキュリティ
     socat              # WSL2 で 1Password SSH エージェントブリッジに必要（wsl.nix 参照）

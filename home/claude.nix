@@ -19,5 +19,9 @@ in {
       source = ../config/claude/hooks/notify.sh;
       executable = true;
     };
+    ".claude/hooks/rtk-rewrite.sh" = {
+      source = ../config/claude/hooks/rtk-rewrite.sh;
+      executable = true;
+    };
   };
 }
