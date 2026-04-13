@@ -13,6 +13,6 @@ runs:
       id: discover
       shell: bash
       run: |
-        # root の入力を抽出（follows は除く）
-        INPUTS=$(nix flake metadata --json | jq -c '.locks.nodes.root.inputs | with_entries(select(.value | .[0] == .key)) | keys')
+        # root の入力を抽出（follows は除く、かつリモートのみ）
+        INPUTS=$(nix flake metadata --json | jq -c '.locks as $locks | .locks.nodes.root.inputs | with_entries(.value as $val | (if $val | type == "string" then $val else $val[0] end) as $node_name | select((($val | type == "string") or ($val | type == "array" and .[0] == .key)) and ($locks.nodes[$node_name].original.type | . == "github" or . == "git" or . == "gitlab"))) | keys')
         echo "matrix=$INPUTS" >> $GITHUB_OUTPUT
