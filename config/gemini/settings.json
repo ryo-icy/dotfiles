@@ -1,0 +1,19 @@
+{
+  "general": {
+    "enableNotifications": true
+  },
+  "hooks": {
+    "AfterAgent": [
+      {
+        "type": "command",
+        "command": "bash ~/.gemini/hooks/notify.sh '応答が完了しました'"
+      }
+    ],
+    "Notification": [
+      {
+        "type": "command",
+        "command": "bash ~/.gemini/hooks/notify.sh"
+      }
+    ]
+  }
+}
