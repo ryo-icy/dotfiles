@@ -1,15 +1,5 @@
-{ lib, ... }:
-let
-  skillsDir = ../config/claude/skills;
-  # .gitkeep を除いてスキルファイルを列挙する
-  skillFiles = builtins.filter
-    (name: name != ".gitkeep")
-    (builtins.attrNames (builtins.readDir skillsDir));
-in {
-  home.file = lib.listToAttrs (map (name: {
-    name = ".claude/skills/${name}";
-    value = { source = "${skillsDir}/${name}"; };
-  }) skillFiles) // {
+{ ... }: {
+  home.file = {
     ".claude/settings.json".source = ../config/claude/settings.json;
     ".claude/statusline-command.sh" = {
       source = ../config/claude/statusline-command.sh;

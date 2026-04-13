@@ -7,6 +7,7 @@
     ./ssh.nix
     ./wsl.nix
     ./claude.nix
+    ./agent-skills.nix
     ./nvim.nix
     ./yazi.nix
     ./lazygit.nix

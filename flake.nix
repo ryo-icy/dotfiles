@@ -7,9 +7,17 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    agent-skills-nix = {
+      url = "github:Kyure-A/agent-skills-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    agent-skills-src = {
+      url = "path:./config/agents/skills";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }:
+  outputs = { self, nixpkgs, home-manager, agent-skills-nix, agent-skills-src, ... }@inputs:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -19,7 +27,11 @@
     in {
       homeConfigurations."ryosh" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        modules = [ ./home/default.nix ];
+        extraSpecialArgs = { inherit inputs; };
+        modules = [
+          ./home/default.nix
+          agent-skills-nix.homeManagerModules.default
+        ];
       };
 
       apps.${system} = {
