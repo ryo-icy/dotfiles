@@ -1,4 +1,31 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(rtk git branch*)",
+      "Bash(rtk git status*)",
+      "Bash(rtk git diff*)",
+      "Bash(rtk git log*)",
+      "Bash(rtk gh pr list*)",
+      "Bash(rtk gh pr view*)",
+      "Bash(rtk grep*)",
+      "Bash(rtk ls*)",
+      "Bash(rtk mkdir*)",
+      "Bash(rtk pwd*)",
+      "Bash(git branch*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(gh pr list*)",
+      "Bash(gh pr view*)",
+      "Bash(grep*)",
+      "Bash(ls*)",
+      "Bash(mkdir*)",
+      "Bash(pwd*)",
+      "Bash(cd *)",
+      "WebFetch",
+      "WebSearch"
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "bash ~/.claude/statusline-command.sh"

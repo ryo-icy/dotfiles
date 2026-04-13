@@ -113,11 +113,11 @@ EOF
 )"
 ```
 
-4. 作成されたPRのURLをMarkdownリンク形式でユーザーに伝える：
+4. 作成されたPRのURLをそのままユーザーに伝える：
    ```
-   [<owner>/<repo>#<number>](https://github.com/<owner>/<repo>/pull/<number>)
+   https://github.com/<owner>/<repo>/pull/<number>
    ```
-   例: `[ryo-icy/dotfiles#32](https://github.com/ryo-icy/dotfiles/pull/32)`
+   例: `https://github.com/ryo-icy/dotfiles/pull/32`
 
 ## 注意事項
 
