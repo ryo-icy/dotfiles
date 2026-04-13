@@ -1,6 +1,9 @@
 { ... }: {
   home.file = {
-    ".claude/settings.json".source = ../config/claude/settings.json;
+    ".claude/settings.json" = {
+      source = ../config/claude/settings.json;
+      force = true;
+    };
     ".claude/statusline-command.sh" = {
       source = ../config/claude/statusline-command.sh;
       executable = true;
