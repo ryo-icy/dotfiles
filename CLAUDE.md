@@ -20,15 +20,25 @@ flake.nix              # nixpkgs + home-manager の入力定義
 home/
   default.nix          # ルートモジュール（username, homeDirectory, stateVersion）
   packages.nix         # home.packages（Nix 管理パッケージ）
-  shell.nix            # programs.zsh（プラグイン・エイリアス・補完）
+  shell.nix            # programs.zsh（プラグイン・エイリアス・補完・gclone/gcd 関数）
   starship.nix         # programs.starship（プロンプト設定）
-  git.nix              # programs.git（ssh.exe 連携含む）
+  git.nix              # programs.git（delta pager・ghq.root・nvim エディタ）
   ssh.nix              # programs.ssh（全 Host ブロック）
   wsl.nix              # WSL2 固有設定（npiperelay ブリッジ・PATH）
-  claude.nix           # ~/.claude/skills のシンボリックリンク管理
-  pkgs/                # カスタムパッケージ定義 (difit, ccusage, openclaw)
-claude/
-  skills/              # Claude Code スキルファイル（通常形式で管理）
+  claude.nix           # config/claude/* → ~/.claude/* のシンボリックリンク管理
+  nvim.nix             # programs.neovim（config/nvim/init.lua のリンク管理）
+  yazi.nix             # programs.yazi（zsh 統合・zoxide キーバインド）
+  lazygit.nix          # programs.lazygit（delta side-by-side 連携）
+  pkgs/                # カスタムパッケージ定義 (difit, ccusage, openclaw, mo)
+config/
+  claude/
+    skills/            # Claude Code スキルファイル（通常形式で管理）
+    settings.json      # Claude Code 設定（statusLine・hooks）
+    statusline-command.sh
+    hooks/
+      notify.sh        # Windows トースト通知（Stop/Notification フック）
+  nvim/
+    init.lua           # Neovim 設定
 scripts/
   bootstrap.sh              # 新規マシン初回セットアップスクリプト
   export-ssh-keys.sh        # 1Password から SSH 公開鍵を一括エクスポート
@@ -55,7 +65,9 @@ scripts/
 ### Nix 管理のカスタムパッケージ (NPM系)
 `difit`, `ccusage`, `openclaw` などの nixpkgs 未収録ツールは、`home/pkgs/` 以下の個別の Nix ファイルで定義し、ソースからビルドする。これにより、NPM ツールのバージョンと依存関係を Nix で宣言的に管理する。
 
-#### ビルド時の注意点
+`mo`（Markdown ビューア）は Go バイナリのため npm ビルドは不要。GitHub Releases から linux_amd64 tarball を直接ダウンロードして使用する。
+
+#### NPM ビルド時の注意点
 - **ネットワーク制限**: Nix サンドボックス内ではネットワークアクセスが禁止されているため、`pnpm run build` が内部で外部 API やスキーマ（LiteLLM 等）をフェッチしようとする場合、ビルドが失敗する。
 - **直接実行の推奨**: `ccusage` のようにビルドスクリプトが複雑な場合は、`pnpm run build` 全体ではなく、`tsdown` などのモジュールバンドラーを `node_modules` から直接実行して最小限の成果物のみを生成する。
 - **シンボリックリンクの掃除**: PNPM が作成する `node_modules` 内の壊れたシンボリックリンクは、Nix のビルド成果物スキャンでエラーを引き起こすため、`find -xtype l -delete` で削除する必要がある。
@@ -87,6 +99,20 @@ Linux ネイティブ ssh や `op` CLI など `SSH_AUTH_SOCK` を参照するツ
 すべての SSH 接続に適用される。Git も `core.sshCommand` を設定せず Linux ssh を使用する。
 - Windows 側: `\\.\pipe\openssh-ssh-agent`（1Password が提供）
 - Linux 側: `/tmp/ssh-agent-1p.sock`（`$SSH_AUTH_SOCK` に設定）
+
+### shell.nix の Shell 関数
+
+`home/shell.nix` には以下の関数が定義されている:
+
+- `gclone()`: `gh repo list` の結果を fzf でインタラクティブに選択し、`ghq get` で SSH クローンする
+- `gcd()`: `ghq list` の結果を fzf でインタラクティブに選択し、そのディレクトリに cd する
+
+### git.nix の設定
+
+- `core.editor = nvim`（コミットメッセージ等のエディタ）
+- `diff.pager = delta`（side-by-side diff ビューア）
+- `merge.conflictstyle = zdiff3`（マージコンフリクトの表示形式）
+- `ghq.root = ~/codes`（ghq のリポジトリ管理ルート）
 
 ### kubeconfig の管理
 kubeconfig にはシークレット情報が含まれるため、リポジトリには含めない。
