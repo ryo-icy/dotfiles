@@ -19,6 +19,12 @@
     }
   },
   "hooks": {
+    "BeforeAgent": [
+      {
+        "type": "command",
+        "command": "bash ~/.gemini/hooks/notify.sh '応答を待っています...'"
+      }
+    ],
     "AfterAgent": [
       {
         "type": "command",

@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 # Gemini CLI Windows トースト通知スクリプト
-#
-# 使い方:
-#   bash notify.sh "メッセージ"   # 固定メッセージで通知（Stop フック用）
-#   echo '{"message":"..."}' | bash notify.sh  # stdin の JSON からメッセージを取得（Notification フック用）
 
 if [[ $# -ge 1 ]]; then
     MESSAGE="$1"
@@ -14,7 +10,7 @@ fi
 
 TITLE="Gemini CLI"
 
-powershell.exe -Command "
+powershell.exe -NoProfile -Command "
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null;
 \$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02);
 \$xml = [xml]\$template.GetXml();
