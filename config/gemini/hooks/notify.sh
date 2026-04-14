@@ -11,8 +11,8 @@ fi
 TITLE="Gemini CLI"
 
 # PowerShell 側でシングルクォートが壊れないようにエスケープ（' -> ''）
-SAFE_MESSAGE=$(echo "$MESSAGE" | sed "s/'/''/g")
-SAFE_TITLE=$(echo "$TITLE" | sed "s/'/''/g")
+SAFE_MESSAGE="${MESSAGE//\'/\'\'}"
+SAFE_TITLE="${TITLE//\'/\'\'}"
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null;
