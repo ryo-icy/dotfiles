@@ -32,10 +32,12 @@
 
     # インフラ・クラウド
     kubectl            # Kubernetes クラスタ操作
+    argocd             # Argo CD 操作用 CLI
     terraform          # インフラのコードによるプロビジョニングツール
     tflint             # Terraform 静的解析ツール
     google-cloud-sdk   # GCP 操作 CLI（gcloud・gsutil・bq）
     google-clasp       # Google Apps Script ローカル開発 CLI（clasp）
+    cloudflared        # Cloudflare Tunnel・Access 用 CLI
 
     # ネットワーク診断・通信
     wget               # ファイルダウンロード
