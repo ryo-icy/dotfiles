@@ -26,6 +26,7 @@
     # lazygit は home/lazygit.nix で programs.lazygit として管理（delta 連携のため）
     btop               # リソースモニタ（CPU・メモリ・ネットワーク）
     nodejs_24          # Node.js ランタイム（NVM の代替）
+    pnpm               # pnpm パッケージマネージャ
     (import ./pkgs/difit.nix { inherit pkgs; })    # Git 差分ビューア
     (import ./pkgs/mo.nix { inherit pkgs; })       # Markdown ビューア（ブラウザで開く）
     gh                 # GitHub CLI
