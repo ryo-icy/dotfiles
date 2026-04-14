@@ -30,10 +30,8 @@
       # WSL2: クリップボードへのコピー（文字コードを CP932 に変換してから clip.exe へ渡す）
       clip = "iconv -t cp932 | clip.exe";
 
-      # WSL2: ブラウザ起動（ArgoCD CLI などが xdg-open を期待するため）
-      xdg-open = "wslview";
-
       # npm -g は Nix ストア（read-only）に書き込むため --prefix を必須とする
+
       update-gemini = "npm install -g @google/gemini-cli --prefix \"$HOME/.local\"";
     };
 

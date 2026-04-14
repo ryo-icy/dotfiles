@@ -19,5 +19,9 @@
   # Set once at initial activation. Never change after first `home-manager switch`.
   home.stateVersion = "24.11";
 
+  home.sessionPath = [
+    "$HOME/.local/bin"
+  ];
+
   programs.home-manager.enable = true;
 }
