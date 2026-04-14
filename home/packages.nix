@@ -4,6 +4,7 @@
     eza                # ls の代替（カラー・Git 情報付き）
     bat                # cat の代替（シンタックスハイライト付き）
     fzf                # あいまい検索（コマンド履歴・ファイル検索）
+    wslu               # WSL ユーティリティ（wslview でブラウザ起動など）
     # yazi は home/yazi.nix で programs.yazi として管理（shell integration のため）
     zoxide             # スマートな cd コマンド（頻度・最近の履歴で補完）
     tree               # ディレクトリツリー表示
