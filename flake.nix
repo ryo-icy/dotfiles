@@ -44,14 +44,20 @@
           name = "rust-dev-shell";
           TZ = "Asia/Tokyo";
           buildInputs = with pkgs; [
-            # Rust stable
+            # Rust stable (Windows cross-compile target included)
             (rust-bin.stable.latest.default.override {
               extensions = [ "rust-src" "rust-analyzer" ];
+              targets = [ "x86_64-pc-windows-msvc" ];
             })
+            # Windows cross-compile toolchain
+            cargo-xwin
+            llvm    # llvm-rc (Windows resource compiler for tauri-winres)
+            clang   # clang-cl (C cross-compiler for MSVC target)
+            lld     # lld-link (linker for MSVC target)
             # Node.js & pnpm
             nodejs_20
             pnpm
-            # Tauri build dependencies
+            # Tauri build dependencies (Linux host)
             pkg-config
             dbus
             openssl_3
