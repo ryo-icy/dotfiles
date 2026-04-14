@@ -10,12 +10,16 @@ fi
 
 TITLE="Gemini CLI"
 
-powershell.exe -NoProfile -Command "
+# PowerShell 側でシングルクォートが壊れないようにエスケープ（' -> ''）
+SAFE_MESSAGE="${MESSAGE//\'/\'\'}"
+SAFE_TITLE="${TITLE//\'/\'\'}"
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null;
 \$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02);
 \$xml = [xml]\$template.GetXml();
-\$xml.toast.visual.binding.text[0].AppendChild(\$xml.CreateTextNode('${TITLE}')) | Out-Null;
-\$xml.toast.visual.binding.text[1].AppendChild(\$xml.CreateTextNode('${MESSAGE}')) | Out-Null;
+\$xml.toast.visual.binding.text[0].AppendChild(\$xml.CreateTextNode('${SAFE_TITLE}')) | Out-Null;
+\$xml.toast.visual.binding.text[1].AppendChild(\$xml.CreateTextNode('${SAFE_MESSAGE}')) | Out-Null;
 \$audio = \$xml.CreateElement('audio');
 \$audio.SetAttribute('src', 'ms-winsoundevent:Notification.Reminder');
 \$audio.SetAttribute('loop', 'false');
