@@ -80,7 +80,10 @@
             export TZDIR=${pkgs.tzdata}/share/zoneinfo
             echo "Rust & Tauri development environment loaded!"
             echo "Run 'pnpm tauri dev' to start."
-            exec zsh
+            # インタラクティブシェルの場合（手動で nix develop した時）のみ zsh を起動
+            if [[ $- == *i* ]]; then
+              exec zsh
+            fi
           '';
         };
 
@@ -104,7 +107,10 @@
             echo "Python development environment loaded!"
             echo "Python version: $(python --version)"
             echo "Linter/Formatter: ruff"
-            exec zsh
+            # インタラクティブシェルの場合（手動で nix develop した時）のみ zsh を起動
+            if [[ $- == *i* ]]; then
+              exec zsh
+            fi
           '';
         };
       };
