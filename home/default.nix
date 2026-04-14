@@ -23,5 +23,9 @@
     "$HOME/.local/bin"
   ];
 
+  home.sessionVariables = {
+    TZ = "Asia/Tokyo";
+  };
+
   programs.home-manager.enable = true;
 }

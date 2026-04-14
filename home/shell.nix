@@ -31,7 +31,6 @@
       clip = "iconv -t cp932 | clip.exe";
 
       # npm -g は Nix ストア（read-only）に書き込むため --prefix を必須とする
-
       update-gemini = "npm install -g @google/gemini-cli --prefix \"$HOME/.local\"";
     };
 
@@ -55,5 +54,11 @@
         [[ -n "$dir" ]] && cd "$(ghq root)/$dir"
       }
     '';
+  };
+
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+    nix-direnv.enable = true;
   };
 }

@@ -15,14 +15,19 @@
       url = "path:./config/agents/skills";
       flake = false;
     };
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, agent-skills-nix, agent-skills-src, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, agent-skills-nix, agent-skills-src, rust-overlay, ... }@inputs:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;
+        overlays = [ (import rust-overlay) ];
       };
     in {
       homeConfigurations."ryosh" = home-manager.lib.homeManagerConfiguration {
@@ -32,6 +37,76 @@
           ./home/default.nix
           agent-skills-nix.homeManagerModules.default
         ];
+      };
+
+      devShells.${system} = {
+        rust = pkgs.mkShell {
+          name = "rust-dev-shell";
+          TZ = "Asia/Tokyo";
+          buildInputs = with pkgs; [
+            # Rust stable
+            (rust-bin.stable.latest.default.override {
+              extensions = [ "rust-src" "rust-analyzer" ];
+            })
+            # Node.js & pnpm
+            nodejs_20
+            pnpm
+            # Tauri build dependencies
+            pkg-config
+            dbus
+            openssl_3
+            glib
+            gtk3
+            libsoup_3
+            webkitgtk_4_1
+            librsvg
+            # タイムゾーンDB（statusline の時刻表示に必要）
+            tzdata
+            zsh
+          ];
+
+          shellHook = ''
+            export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath (with pkgs; [
+              webkitgtk_4_1
+              gtk3
+              cairo
+              gdk-pixbuf
+              glib
+              dbus
+              openssl_3
+              librsvg
+            ])}:$LD_LIBRARY_PATH
+            export XDG_DATA_DIRS=$GSETTINGS_SCHEMAS_PATH
+            export TZDIR=${pkgs.tzdata}/share/zoneinfo
+            echo "Rust & Tauri development environment loaded!"
+            echo "Run 'pnpm tauri dev' to start."
+            exec zsh
+          '';
+        };
+
+        python = pkgs.mkShell {
+          name = "python-dev-shell";
+          TZ = "Asia/Tokyo";
+          buildInputs = with pkgs; [
+            (python3.withPackages (ps: with ps; [
+              pip
+              setuptools
+              virtualenv
+            ]))
+            ruff           # 高速な Linter/Formatter (Python のデファクトになりつつある)
+            pyright        # 静的型チェック (VSCode との相性が良い)
+            uv             # 超高速な Python パッケージマネージャ (pip の代替として推奨)
+            zsh
+          ];
+
+          shellHook = ''
+            export PYTHONBREAKPOINT=ipdb.set_trace
+            echo "Python development environment loaded!"
+            echo "Python version: $(python --version)"
+            echo "Linter/Formatter: ruff"
+            exec zsh
+          '';
+        };
       };
 
       apps.${system} = {

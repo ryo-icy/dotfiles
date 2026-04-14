@@ -4,7 +4,14 @@
   programs.starship = {
     enable = true;
     settings = {
-      format = "[░▒](#a3aed2)$username[ ](bg:#769ff0 fg:#a3aed2)$directory[ ](fg:#769ff0 bg:#394260)$git_branch$git_status[ ](fg:#394260)\n$character";
+      format = "[░▒](#a3aed2)$username[ ](bg:#769ff0 fg:#a3aed2)$directory[ ](fg:#769ff0 bg:#394260)$git_branch$git_status$nix_shell[ ](fg:#394260)\n$character";
+
+      nix_shell = {
+        symbol = " ";
+        style = "bg:#394260";
+        format = "[[ $symbol$state( \\($name\\)) ](fg:#769ff0 bg:#394260)]($style)";
+        impure_msg = "";
+      };
 
       username = {
         show_always = true;
