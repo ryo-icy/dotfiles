@@ -4,6 +4,7 @@
     eza                # ls の代替（カラー・Git 情報付き）
     bat                # cat の代替（シンタックスハイライト付き）
     fzf                # あいまい検索（コマンド履歴・ファイル検索）
+    wslu               # WSL ユーティリティ（wslview でブラウザ起動など）
     # yazi は home/yazi.nix で programs.yazi として管理（shell integration のため）
     zoxide             # スマートな cd コマンド（頻度・最近の履歴で補完）
     tree               # ディレクトリツリー表示
@@ -32,10 +33,12 @@
 
     # インフラ・クラウド
     kubectl            # Kubernetes クラスタ操作
+    argocd             # Argo CD 操作用 CLI
     terraform          # インフラのコードによるプロビジョニングツール
     tflint             # Terraform 静的解析ツール
     google-cloud-sdk   # GCP 操作 CLI（gcloud・gsutil・bq）
     google-clasp       # Google Apps Script ローカル開発 CLI（clasp）
+    cloudflared        # Cloudflare Tunnel・Access 用 CLI
 
     # ネットワーク診断・通信
     wget               # ファイルダウンロード
