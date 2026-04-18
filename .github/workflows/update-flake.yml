@@ -34,4 +34,3 @@ jobs:
           input-name: ${{ matrix.input-name }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           minimum-release-age-days: 3
-          auto-merge: true
