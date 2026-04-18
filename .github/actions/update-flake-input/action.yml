@@ -8,9 +8,6 @@ inputs:
   minimum-release-age-days:
     description: 'PR を作成するために必要な最小経過日数'
     default: '3'
-  auto-merge:
-    description: '自動マージを有効にするか'
-    default: 'true'
   github-token:
     description: 'GitHub トークン'
     required: true
@@ -103,7 +100,3 @@ runs:
         git push -f origin "$BRANCH"
         
         gh pr create --title "$TITLE" --body "$BODY" --head "$BRANCH" --base main || gh pr edit "$BRANCH" --title "$TITLE" --body "$BODY"
-        
-        if [ "${{ inputs.auto-merge }}" == "true" ]; then
-          gh pr merge --auto --merge "$BRANCH"
-        fi
