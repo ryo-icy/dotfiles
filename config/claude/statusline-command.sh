@@ -57,6 +57,8 @@ format_reset_time() {
   fi
   TZ="Asia/Tokyo" date -d "@${ts}" +"${fmt}" 2>/dev/null \
     || TZ="Asia/Tokyo" date -r "${ts}" +"${fmt}" 2>/dev/null \
+    || date -u -d "@$(( ts + 32400 ))" +"${fmt}" 2>/dev/null \
+    || date -u -r "$(( ts + 32400 ))" +"${fmt}" 2>/dev/null \
     || printf "%s" "-"
 }
 
