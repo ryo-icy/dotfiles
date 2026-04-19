@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ pkgs, inputs, ... }: {
   home.packages = with pkgs; [
     # シェル・ファイル操作
     eza                # ls の代替（カラー・Git 情報付き）
@@ -21,6 +21,9 @@
     _1password-cli     # 1Password CLI（op コマンド）
 
     # 開発ツール
+    inputs.nix-claude-code.packages.${pkgs.system}.claude  # Claude Code CLI（公式バイナリ、nix-claude-code 経由）
+    codex              # OpenAI Codex CLI（Rust 版ターミナルコーディングエージェント）
+    github-copilot-cli # GitHub Copilot CLI（ターミナル向けコーディングエージェント）
     neovim             # モダンな Vim 互換テキストエディタ
     delta              # git diff ビューア（シンタックスハイライト・サイドバイサイド）
     # lazygit は home/lazygit.nix で programs.lazygit として管理（delta 連携のため）
