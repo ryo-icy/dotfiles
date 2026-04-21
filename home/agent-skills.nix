@@ -9,9 +9,15 @@
     # すべてのスキルを有効化
     skills.enableAll = true;
 
-    # Claude と Gemini の両方に配信
+    # Claude / Gemini / Codex / GitHub Copilot 向けに配信
+    # upstream: https://github.com/Kyure-A/agent-skills-nix
     targets = {
+      # Codex 系: upstream には共通 `agents` と `codex` の両方がある
+      # 現行 Codex は ~/.agents/skills を使う系統もあるため両方有効化する
+      agents.enable = true;
+      codex.enable = true;
       claude.enable = true;
+      copilot.enable = true;
       gemini.enable = true;
       antigravity.enable = true;
     };

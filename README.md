@@ -1,77 +1,98 @@
 # dotfiles
 
-WSL2 Ubuntu 環境を宣言的に管理する dotfiles リポジトリ。
-Nix + home-manager を使用し、新しいマシンでも `bootstrap.sh` 一発で環境を再現できる。
+WSL2 Ubuntu 環境を Nix + home-manager で宣言的に管理する dotfiles リポジトリ。
+`flake.lock` で依存を固定し、`scripts/bootstrap.sh` と `home-manager switch` で同じ環境を再現する。
+
+## 概要
+
+- シェル、Git、SSH、Neovim、Yazi、Lazygit を home-manager で管理
+- Claude Code は `nix-claude-code` 経由で Nix 管理
+- Gemini CLI は `~/.local/bin/` に npm で導入
+- 1Password SSH Agent を `npiperelay.exe + socat` で WSL2 にブリッジ
+- エージェント用スキルは `agent-skills-nix` で Claude / Gemini / antigravity に配信
 
 ## 構成
 
-```
+```text
 dotfiles/
-├── flake.nix                  # Nix フレーク定義
+├── flake.nix                  # flake input / homeConfiguration / devShell / apps
 ├── home/
-│   ├── default.nix            # home-manager ルート設定
-│   ├── packages.nix           # 管理パッケージ一覧
-│   ├── shell.nix              # Zsh 設定（プラグイン・エイリアス・gclone/gcd 関数）
-│   ├── starship.nix           # Starship プロンプト設定
-│   ├── git.nix                # Git 設定（delta pager・ghq.root・nvim エディタ）
-│   ├── ssh.nix                # SSH クライアント設定
-│   ├── wsl.nix                # WSL2 固有設定（SSH Agent ブリッジ等）
-│   ├── claude.nix             # config/claude/* → ~/.claude/* シンボリックリンク管理
-│   ├── nvim.nix               # Neovim 設定
-│   ├── yazi.nix               # Yazi ファイルマネージャ（zsh 統合・zoxide キーバインド）
-│   ├── lazygit.nix            # Lazygit TUI（delta side-by-side 連携）
-│   └── pkgs/                  # カスタムパッケージ定義 (difit, ccusage, mo)
+│   ├── default.nix            # home-manager ルートモジュール
+│   ├── packages.nix           # Nix 管理パッケージ一覧
+│   ├── shell.nix              # zsh 設定、エイリアス、gclone/gcd
+│   ├── git.nix                # git 設定（delta, ghq.root, nvim）
+│   ├── starship.nix           # starship プロンプト
+│   ├── ssh.nix                # SSH 設定
+│   ├── wsl.nix                # WSL2 固有設定、SSH_AUTH_SOCK ブリッジ
+│   ├── claude.nix             # ~/.claude 配下の設定・hook 配置
+│   ├── gemini.nix             # ~/.gemini 配下の設定・hook・policy 配置
+│   ├── agent-skills.nix       # agent-skills 配信設定
+│   ├── nvim.nix               # ~/.config/nvim/init.lua 配置
+│   ├── yazi.nix               # yazi 設定と zsh 統合
+│   ├── lazygit.nix            # lazygit と delta の連携設定
+│   └── pkgs/                  # カスタムパッケージ (ccusage, difit, mo, rtk)
 ├── config/
-│   ├── claude/                # Claude Code スキルと設定
-│   │   ├── settings.json      # statusLine・Stop/Notification フック設定
+│   ├── claude/
+│   │   ├── settings.json
 │   │   ├── statusline-command.sh
-│   │   ├── hooks/
-│   │   │   └── notify.sh      # Windows トースト通知
-│   │   └── skills/            # スキルファイル（branch, commit, pr）
-│   └── nvim/
-│       └── init.lua           # Neovim 設定
+│   │   └── hooks/
+│   │       ├── notify.sh
+│   │       └── rtk-rewrite.sh
+│   ├── gemini/
+│   │   ├── settings.json
+│   │   ├── hooks/notify.sh
+│   │   └── policies/claude-sync.toml
+│   ├── agents/
+│   │   └── skills/            # branch / commit / pr / review-plan
+│   └── nvim/init.lua
 └── scripts/
-    ├── bootstrap.sh              # 全ユニットを順番に実行するオーケストレーター
-    ├── export-ssh-keys.sh        # 1Password から SSH 公開鍵をエクスポート
-    ├── export-kubeconfig.sh      # 1Password から kubeconfig をエクスポート
-    └── units/                    # 各ユニットは単独でも実行可能
-        ├── 01-backup.sh          # 既存 dotfile のバックアップ
-        ├── 02-docker.sh          # Docker Engine のインストール
-        ├── 03-nix.sh             # Nix のインストール
-        ├── 04-npiperelay.sh      # npiperelay.exe のダウンロード
-        ├── 05-home-manager.sh    # home-manager switch の実行
-        ├── 06-claude.sh          # Claude CLI のインストール
-        ├── 07-gemini.sh          # Gemini CLI のインストール
-        ├── 08-ssh-keys.sh        # SSH 公開鍵のエクスポート
-        ├── 09-chsh.sh            # デフォルトシェルを zsh に変更
-        └── 10-kubeconfig.sh      # kubeconfig のエクスポート
+    ├── bootstrap.sh
+    ├── export-ssh-keys.sh
+    ├── export-kubeconfig.sh
+    └── units/
+        ├── 01-backup.sh
+        ├── 02-docker.sh
+        ├── 03-nix.sh
+        ├── 04-npiperelay.sh
+        ├── 05-home-manager.sh
+        ├── 07-gemini.sh
+        ├── 08-ssh-keys.sh
+        ├── 09-chsh.sh
+        └── 10-kubeconfig.sh
 ```
 
 ## 管理対象
 
-| 設定ファイル | モジュール |
+| 対象 | 管理方法 |
 |---|---|
 | `~/.zshrc` | `home/shell.nix` + `home/wsl.nix` |
 | `~/.gitconfig` | `home/git.nix` |
 | `~/.config/starship.toml` | `home/starship.nix` |
 | `~/.ssh/config` | `home/ssh.nix` |
-| `~/.claude/` 設定・スキル | `home/claude.nix` |
+| `~/.claude/*` | `home/claude.nix` |
+| `~/.gemini/hooks/*`, `~/.gemini/policies/*` | `home/gemini.nix` |
+| `~/.gemini/settings.json` | `home/gemini.nix` がベース設定をマージ |
+| agent skills | `home/agent-skills.nix` + `config/agents/skills/` |
 | `~/.config/nvim/init.lua` | `home/nvim.nix` |
 | yazi 設定 | `home/yazi.nix` |
 | lazygit 設定 | `home/lazygit.nix` |
-| `difit`, `ccusage`, `mo` | `home/pkgs/*.nix` |
+| Claude Code, Codex, Copilot CLI, kubectl など | `home/packages.nix` |
+| `ccusage`, `difit`, `mo`, `rtk` | `home/pkgs/*.nix` |
 
-**Nix 管理外**（bootstrap.sh でインストール）:
-- Claude CLI — 公式ネイティブインストーラー、auto-updater のため Nix 管理外
-- Gemini CLI — npm (`@google/gemini-cli`)
-- Docker Engine — apt、システムレベルの設定が必要なため Nix 管理外
-- `~/.ssh/imported_keys/` — SSH 公開鍵（1Password からエクスポート、リポジトリ外）
-- `~/.kube/config` — kubeconfig（1Password からエクスポート、リポジトリ外）
-- 秘密鍵 — 1Password で管理、ファイルには保存しない
+## Nix 管理外
+
+| ツール/データ | 配置先 | 理由 |
+|---|---|---|
+| Gemini CLI | `~/.local/bin/gemini` | npm の最新版を使うため |
+| Docker Engine | apt | systemd / cgroup など OS レベル設定が必要 |
+| `npiperelay.exe` | `~/.local/bin/npiperelay.exe` | Windows named pipe を WSL2 に中継するため |
+| `~/.ssh/imported_keys/` | ホームディレクトリ | 1Password から都度エクスポートするため |
+| `~/.kube/config` | ホームディレクトリ | シークレットをリポジトリに含めないため |
+| SSH 秘密鍵 | 1Password | ファイル保存しない運用のため |
 
 ## セットアップ
 
-### 新規マシン（Nix 未インストール）
+### 新規マシン
 
 ```bash
 git clone git@github.com:ryo-icy/dotfiles.git ~/codes/dotfiles
@@ -79,174 +100,148 @@ cd ~/codes/dotfiles
 bash scripts/bootstrap.sh
 ```
 
-bootstrap.sh が行うこと:
-1. 既存 dotfile をバックアップ（`~/.dotfiles-backup-<timestamp>/`）
-2. Docker Engine をインストール（apt）、docker グループにユーザーを追加
-3. Nix をインストール（[Determinate Systems インストーラー](https://github.com/DeterminateSystems/nix-installer)）
-4. `npiperelay.exe` をダウンロード（`~/.local/bin/`、1Password SSH Agent ブリッジ用）
-5. home-manager switch を実行
-6. Claude CLI をインストール（`~/.local/bin/`）
-7. Gemini CLI をインストール（`~/.local/bin/`）
-8. 1Password から SSH 公開鍵をエクスポート
-9. デフォルトシェルを zsh に変更
-10. 1Password から kubeconfig をエクスポート
+`bootstrap.sh` は次を順に実行する。
 
-### 既存マシン（設定を更新する場合）
+1. 既存 dotfiles をバックアップ
+2. Docker Engine をインストール
+3. Nix をインストール
+4. `npiperelay.exe` を配置
+5. `home-manager switch` を実行
+6. Gemini CLI を `~/.local/bin/` にインストール
+7. 1Password から SSH 公開鍵をエクスポート
+8. デフォルトシェルを zsh に変更
+9. 1Password から kubeconfig をエクスポート
+
+Claude Code は `05-home-manager.sh` の中で Nix 管理パッケージとして導入される。
+
+### 既存マシンで設定を反映
 
 ```bash
 cd ~/codes/dotfiles
 home-manager switch --flake ".#ryosh"
 ```
 
-### 依存関係（nixpkgs・home-manager）を更新する
-
-`flake.lock` でリビジョンが固定されているため、明示的に更新操作を行わない限りパッケージバージョンは変わらない。
+または:
 
 ```bash
-# すべての input を最新に更新
+nix run .#switch
+```
+
+### 特定ユニットだけ再実行
+
+```bash
+bash scripts/units/05-home-manager.sh
+bash scripts/units/07-gemini.sh
+bash scripts/units/08-ssh-keys.sh
+bash scripts/units/10-kubeconfig.sh
+```
+
+## 更新運用
+
+### Home Manager の状態バージョン
+
+`home/default.nix` の `home.stateVersion` は初回アクティベーション時点の互換性基準であり、以後変更しない。
+
+### flake.lock
+
+`flake.lock` はリポジトリにコミットして固定する。
+
+```bash
 nix flake update
-
-# 特定の input だけ更新
-nix flake update nixpkgs
-
-# 更新内容を確認してコミット
 git add flake.lock
 git commit -m "chore: nix flake update"
-
-# 反映
 home-manager switch --flake ".#ryosh"
 ```
 
-### 特定のユニットだけ再実行
-
-各ユニットスクリプトは単独でも実行できる。
+特定 input だけ更新する場合:
 
 ```bash
-# Docker だけ再インストール
-bash scripts/units/02-docker.sh
-
-# home-manager の設定を反映
-bash scripts/units/05-home-manager.sh
-
-# Claude CLI だけ更新
-bash scripts/units/06-claude.sh
-
-# kubeconfig を再エクスポート
-bash scripts/units/10-kubeconfig.sh
+nix flake update nixpkgs
 ```
 
-### SSH 公開鍵の再エクスポート
+### Gemini CLI の更新
 
 ```bash
-op signin
-bash scripts/units/08-ssh-keys.sh
-# または直接
-bash scripts/export-ssh-keys.sh
+update-gemini
+# または
+bash scripts/units/07-gemini.sh
 ```
 
-### kubeconfig の再エクスポート
+## 1Password 連携
 
-```bash
-op signin
-bash scripts/units/10-kubeconfig.sh
-# または直接
-bash scripts/export-kubeconfig.sh
-```
+### SSH Agent ブリッジ
 
-## 1Password との連携
+Windows 側の `\\.\pipe\openssh-ssh-agent` を `npiperelay.exe + socat` で `/tmp/ssh-agent-1p.sock` に中継し、Linux ネイティブの `ssh` や `op` から使う。
 
-### SSH Agent（秘密鍵をファイルに保存しない）
-
-1Password Windows アプリの SSH Agent 機能を使用する。
-WSL2 からは `npiperelay.exe` + `socat` で Windows の named pipe を Unix ソケットに転送してアクセスする。
-
-```
+```text
 1Password (Windows)
   └─ \\.\pipe\openssh-ssh-agent
        └─ npiperelay.exe + socat
-            └─ /tmp/ssh-agent-1p.sock  ($SSH_AUTH_SOCK)
+            └─ /tmp/ssh-agent-1p.sock
 ```
 
-Git は Linux ネイティブの `ssh` を使用する（`core.sshCommand` は設定しない）。`SSH_AUTH_SOCK` が `/tmp/ssh-agent-1p.sock` に向いているため、このブリッジ経由で 1Password SSH Agent を利用できる。
+`home/wsl.nix` が `SSH_AUTH_SOCK=/tmp/ssh-agent-1p.sock` を設定するため、`core.sshCommand` を上書きせずに Linux 側の `~/.ssh/config` をそのまま使える。
 
 ### SSH 公開鍵のエクスポート
 
-1Password の SSH Key アイテムに `dotfiles` タグを付けておくと、スクリプトが自動で検出・エクスポートする。
-
 ```bash
-# タグで一括エクスポート（デフォルト: "dotfiles" タグ）
+op signin
 bash scripts/export-ssh-keys.sh
-
-# カスタムタグ
 bash scripts/export-ssh-keys.sh my-tag
-
-# タグなし（全 SSH Key アイテム）
 bash scripts/export-ssh-keys.sh ""
 ```
 
-エクスポート先: `~/.ssh/imported_keys/<アイテム名>.pub`
+出力先は `~/.ssh/imported_keys/`。1Password の SSH Key アイテム名をベースに `<name>.pub` を生成する。
 
-SSH config の `IdentityFile` はアイテム名から自動生成されるパスを参照するため、
-1Password のアイテム名と `home/ssh.nix` の `identityFile` パスを合わせておく必要がある。
-
-### kubeconfig の管理
-
-kubeconfig は 1Password にドキュメントタイプで保存し、リポジトリには含めない。
+### kubeconfig のエクスポート
 
 ```bash
-# 初回：1Password に保存
-op document create ~/.kube/config --title "kubeconfig" --tags dotfiles
-
-# 以降：エクスポート
+op signin
 bash scripts/export-kubeconfig.sh
+bash scripts/export-kubeconfig.sh my-kubeconfig
 ```
 
-## パッケージ管理
+1Password の Document アイテムを `~/.kube/config` に書き出す。
 
-Nix で管理するパッケージは `home/packages.nix` に記載。
-追加後は `home-manager switch --flake ".#ryosh"` で反映する。
+## エージェント設定
 
-```nix
-home.packages = with pkgs; [
-  eza bat fzf zoxide tree ghq delta btop socat nodejs_24
-  _1password-cli jq yq
-  neovim gh shellcheck
-  kubectl terraform tflint google-cloud-sdk google-clasp
-  nmap nettools dnsutils traceroute wget
-  (import ./pkgs/ccusage.nix { inherit pkgs; })
-  (import ./pkgs/difit.nix { inherit pkgs; })
-  (import ./pkgs/mo.nix { inherit pkgs; })
-];
-```
+- Claude Code の設定は `config/claude/settings.json`
+- Claude 用 hook は `notify.sh` と `rtk-rewrite.sh`
+- Gemini の設定は `config/gemini/settings.json`
+- Gemini の `settings.json` は symlink ではなくマージ方式で管理する
+- 共通スキルは `config/agents/skills/` に置き、`agent-skills-nix` で配信する
+- 配信先は Claude / Gemini / antigravity
+
+## カスタムパッケージ
+
+`home/pkgs/` では nixpkgs 未収録ツールを個別に定義する。
+
+- `ccusage`: Claude API 使用量確認ツール
+- `difit`: Git 差分ビューア
+- `mo`: Markdown ビューア
+- `rtk`: Claude Code のトークン削減プロキシ
+
+NPM 系ツールを Nix でビルドする場合は、Nix サンドボックスのネットワーク制限と PNPM の壊れた symlink に注意する。
+
+## 便利コマンド
+
+- `gclone`: GitHub リポジトリを fzf で選んで `ghq get`
+- `gcd`: `ghq list` から選んで移動
+- `yy`: yazi 終了時に移動先へ `cd`
+- `lg`: lazygit
+- `ccu`, `ccum`, `ccus`: `ccusage` ショートカット
 
 ## 検証
 
 ```bash
-# Nix 管理パッケージ確認
-which eza bat fzf zoxide ghq delta btop node op kubectl nmap
+home-manager switch --flake ".#ryosh"
 
-# 新規 CLI ツール確認
-which yazi lazygit
-mo --version
-
-# Shell 関数の確認
-type gclone gcd
-
-# bootstrap.sh でインストールしたツール確認
 claude --version
+codex --version
 gemini --version
 docker --version
-docker run hello-world
 
-# home-manager 管理のシンボリックリンク確認
-ls -la ~/.zshrc ~/.gitconfig ~/.config/starship.toml ~/.ssh/config
-ls -la ~/.config/nvim/init.lua
-ls -la ~/.claude/skills/ ~/.claude/settings.json
-
-# 1Password SSH Agent ブリッジ確認
-ls -la /tmp/ssh-agent-1p.sock
+type gclone gcd yy
+ls -la ~/.claude ~/.gemini ~/.config/nvim
 SSH_AUTH_SOCK=/tmp/ssh-agent-1p.sock ssh-add -l
-
-# デフォルトシェル確認
-echo $SHELL  # → /path/to/zsh
 ```
