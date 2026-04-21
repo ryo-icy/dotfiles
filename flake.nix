@@ -19,9 +19,13 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-claude-code = {
+      url = "github:ryoppippi/nix-claude-code";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, agent-skills-nix, agent-skills-src, rust-overlay, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, agent-skills-nix, agent-skills-src, rust-overlay, nix-claude-code, ... }@inputs:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {

@@ -49,7 +49,6 @@ scripts/
     03-nix.sh               # Nix のインストール
     04-npiperelay.sh        # npiperelay.exe のダウンロード（~/.local/bin/）
     05-home-manager.sh      # home-manager switch の実行
-    06-claude.sh            # Claude CLI のインストール（~/.local/bin/）
     07-gemini.sh            # Gemini CLI のインストール（~/.local/bin/）
     08-ssh-keys.sh          # SSH 公開鍵のエクスポート
     09-chsh.sh              # デフォルトシェルを zsh に変更
@@ -72,14 +71,22 @@ scripts/
 - **直接実行の推奨**: `ccusage` のようにビルドスクリプトが複雑な場合は、`pnpm run build` 全体ではなく、`tsdown` などのモジュールバンドラーを `node_modules` から直接実行して最小限の成果物のみを生成する。
 - **シンボリックリンクの掃除**: PNPM が作成する `node_modules` 内の壊れたシンボリックリンクは、Nix のビルド成果物スキャンでエラーを引き起こすため、`find -xtype l -delete` で削除する必要がある。
 
+### Claude Code の Nix 管理（nix-claude-code）
+
+Claude Code は [`ryoppippi/nix-claude-code`](https://github.com/ryoppippi/nix-claude-code) flake 経由で Nix 管理する。
+このフレークは GitHub Actions で1時間ごとに公式バイナリの最新版を取得し、SHA256 チェックサムを `versions/*.json` に記録する。
+このリポジトリの日次 `update-flake.yml` が `flake.lock` を更新する PR を自動作成するため、手動での `nix flake update` は不要。
+
+- **auto-updater 問題の回避**: Nix 管理なので Claude 自体の auto-updater は動作しない。更新は `flake.lock` の更新で行う。
+- **`home/packages.nix`** で `inputs.nix-claude-code.packages.${pkgs.system}.claude` として参照する。
+
 ### Nix 管理外のツール
 
 以下のツールは `scripts/bootstrap.sh` でインストールし、Nix では管理しない。
 
 | ツール | インストール先 | Nix 管理外の理由 |
 |---|---|---|
-| Claude CLI | `~/.local/bin/` (公式ネイティブインストーラー) | auto-updater が Nix ストアの read-only を破壊するため |
-| Gemini CLI | `~/.local/bin/` (`npm --prefix ~/.local`) | Claude CLI と同様の理由 |
+| Gemini CLI | `~/.local/bin/` (`npm --prefix ~/.local`) | nixpkgs のバージョンが npm より古いため |
 | Docker Engine | apt | systemd・cgroup などシステムレベルの設定が必要なため |
 
 ### npm install の install 先
@@ -88,8 +95,8 @@ scripts/
 
 ### Windows バイナリが PATH に混入する問題
 WSL2 では `/mnt/c/` 以下の Windows バイナリも PATH に現れる。
-`command -v claude` や `command -v gemini` で既インストール確認すると Windows 側のバイナリを誤検知するため、
-`~/.local/bin/claude` の**ファイル存在確認**で判定する。
+`command -v gemini` で既インストール確認すると Windows 側のバイナリを誤検知するため、
+`~/.local/bin/gemini` の**ファイル存在確認**で判定する。
 
 ### npiperelay ブリッジの役割
 Linux ネイティブ ssh や `op` CLI など `SSH_AUTH_SOCK` を参照するツールが
