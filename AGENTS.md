@@ -1,6 +1,6 @@
 # AGENTS.md
 
-このファイルは AI Agent(Claude Code/Codex/Gemini) がこのリポジトリで作業する際の指示を定義する。
+このファイルは AI Agent（Claude Code / Codex / Gemini）がこのリポジトリで作業する際の指示を定義する。
 
 ## 言語設定
 
@@ -12,156 +12,187 @@
 ## リポジトリ概要
 
 WSL2 Ubuntu 環境を Nix + home-manager で宣言的に管理する dotfiles リポジトリ。
+`flake.lock` による依存固定、`bootstrap.sh` による初期構築、`home-manager switch` による日常更新を前提にしている。
 
-## アーキテクチャ
+## 現在のアーキテクチャ
 
-```
-flake.nix              # nixpkgs + home-manager の入力定義
+```text
+flake.nix              # flake input / homeConfiguration / devShell / apps
 home/
-  default.nix          # ルートモジュール（username, homeDirectory, stateVersion）
-  packages.nix         # home.packages（Nix 管理パッケージ）
-  shell.nix            # programs.zsh（プラグイン・エイリアス・補完・gclone/gcd 関数）
-  starship.nix         # programs.starship（プロンプト設定）
-  git.nix              # programs.git（delta pager・ghq.root・nvim エディタ）
-  ssh.nix              # programs.ssh（全 Host ブロック）
-  wsl.nix              # WSL2 固有設定（npiperelay ブリッジ・PATH）
-  claude.nix           # config/claude/* → ~/.claude/* のシンボリックリンク管理
-  nvim.nix             # programs.neovim（config/nvim/init.lua のリンク管理）
-  yazi.nix             # programs.yazi（zsh 統合・zoxide キーバインド）
-  lazygit.nix          # programs.lazygit（delta side-by-side 連携）
-  pkgs/                # カスタムパッケージ定義 (difit, ccusage, mo)
+  default.nix          # ルートモジュール（imports, username, stateVersion）
+  packages.nix         # Nix 管理パッケージ
+  shell.nix            # zsh 設定、alias、gclone/gcd
+  git.nix              # git 設定（delta, ghq.root, nvim）
+  starship.nix         # starship 設定
+  ssh.nix              # SSH 設定
+  wsl.nix              # SSH_AUTH_SOCK, npiperelay ブリッジ、PATH
+  claude.nix           # ~/.claude 配下の設定・hook 配置
+  gemini.nix           # ~/.gemini 配下の設定・hook・policy 配置
+  agent-skills.nix     # agent-skills の配信設定
+  nvim.nix             # ~/.config/nvim/init.lua 配置
+  yazi.nix             # yazi 設定と zsh 統合
+  lazygit.nix          # lazygit と delta の連携
+  pkgs/                # カスタムパッケージ (ccusage, difit, mo, rtk)
 config/
   claude/
-    skills/            # Claude Code スキルファイル（通常形式で管理）
-    settings.json      # Claude Code 設定（statusLine・hooks）
+    settings.json
     statusline-command.sh
     hooks/
-      notify.sh        # Windows トースト通知（Stop/Notification フック）
+      notify.sh
+      rtk-rewrite.sh
+  gemini/
+    settings.json
+    hooks/
+      notify.sh
+    policies/
+      claude-sync.toml
+  agents/
+    skills/
+      branch/
+      commit/
+      pr/
+      review-plan/
   nvim/
-    init.lua           # Neovim 設定
+    init.lua
 scripts/
-  bootstrap.sh              # 新規マシン初回セットアップスクリプト
-  export-ssh-keys.sh        # 1Password から SSH 公開鍵を一括エクスポート
-  export-kubeconfig.sh      # 1Password から kubeconfig をエクスポート
+  bootstrap.sh
+  export-ssh-keys.sh
+  export-kubeconfig.sh
   units/
-    01-backup.sh            # 既存 dotfile のバックアップ
-    02-docker.sh            # Docker Engine のインストール
-    03-nix.sh               # Nix のインストール
-    04-npiperelay.sh        # npiperelay.exe のダウンロード（~/.local/bin/）
-    05-home-manager.sh      # home-manager switch の実行
-    07-gemini.sh            # Gemini CLI のインストール（~/.local/bin/）
-    08-ssh-keys.sh          # SSH 公開鍵のエクスポート
-    09-chsh.sh              # デフォルトシェルを zsh に変更
-    10-kubeconfig.sh        # kubeconfig のエクスポート
+    01-backup.sh
+    02-docker.sh
+    03-nix.sh
+    04-npiperelay.sh
+    05-home-manager.sh
+    07-gemini.sh
+    08-ssh-keys.sh
+    09-chsh.sh
+    10-kubeconfig.sh
 ```
 
 ## 重要な設計判断
 
 ### home.stateVersion
-`home/default.nix` の `home.stateVersion` は初回 `home-manager switch` 時のバージョンを設定し、**以後絶対に変更しない**。
-パッケージバージョンではなく home-manager の状態マイグレーション挙動を制御するものであるため。
 
-### Nix 管理のカスタムパッケージ (NPM系)
-`difit`, `ccusage` などの nixpkgs 未収録ツールは、`home/pkgs/` 以下の個別の Nix ファイルで定義し、ソースからビルドする。これにより、NPM ツールのバージョンと依存関係を Nix で宣言的に管理する。
+`home/default.nix` の `home.stateVersion` は初回 `home-manager switch` 時点の互換性基準であり、**以後変更しない**。
+パッケージ更新用の値ではない。
 
-`mo`（Markdown ビューア）は Go バイナリのため npm ビルドは不要。GitHub Releases から linux_amd64 tarball を直接ダウンロードして使用する。
+### Claude Code は Nix 管理
 
-#### NPM ビルド時の注意点
-- **ネットワーク制限**: Nix サンドボックス内ではネットワークアクセスが禁止されているため、`pnpm run build` が内部で外部 API やスキーマ（LiteLLM 等）をフェッチしようとする場合、ビルドが失敗する。
-- **直接実行の推奨**: `ccusage` のようにビルドスクリプトが複雑な場合は、`pnpm run build` 全体ではなく、`tsdown` などのモジュールバンドラーを `node_modules` から直接実行して最小限の成果物のみを生成する。
-- **シンボリックリンクの掃除**: PNPM が作成する `node_modules` 内の壊れたシンボリックリンクは、Nix のビルド成果物スキャンでエラーを引き起こすため、`find -xtype l -delete` で削除する必要がある。
+Claude Code は `flake.nix` の `nix-claude-code` input を通して Nix 管理する。
+`scripts/units/06-claude.sh` は存在しない。Claude Code の導入と更新は `05-home-manager.sh` で行う。
 
-### Claude Code の Nix 管理（nix-claude-code）
+- `home/packages.nix` で `inputs.nix-claude-code.packages.${pkgs.system}.claude` を参照する
+- auto-updater ではなく `flake.lock` 更新でバージョンが進む
 
-Claude Code は [`ryoppippi/nix-claude-code`](https://github.com/ryoppippi/nix-claude-code) flake 経由で Nix 管理する。
-このフレークは GitHub Actions で1時間ごとに公式バイナリの最新版を取得し、SHA256 チェックサムを `versions/*.json` に記録する。
-このリポジトリの日次 `update-flake.yml` が `flake.lock` を更新する PR を自動作成するため、手動での `nix flake update` は不要。
+### Gemini CLI は Nix 管理外
 
-- **auto-updater 問題の回避**: Nix 管理なので Claude 自体の auto-updater は動作しない。更新は `flake.lock` の更新で行う。
-- **`home/packages.nix`** で `inputs.nix-claude-code.packages.${pkgs.system}.claude` として参照する。
+Gemini CLI は `scripts/units/07-gemini.sh` で `npm install -g --prefix "$HOME/.local"` により `~/.local/bin/` へ入れる。
 
-### Nix 管理外のツール
+- WSL2 では Windows 側の `gemini` が PATH に混入するため、存在確認は `command -v` ではなく `~/.local/bin/gemini` を使う
+- `~/.gemini/settings.json` は Gemini が認証情報を書き込むため、symlink ではなくマージ方式で管理する
 
-以下のツールは `scripts/bootstrap.sh` でインストールし、Nix では管理しない。
+### agent-skills の配信
 
-| ツール | インストール先 | Nix 管理外の理由 |
-|---|---|---|
-| Gemini CLI | `~/.local/bin/` (`npm --prefix ~/.local`) | nixpkgs のバージョンが npm より古いため |
-| Docker Engine | apt | systemd・cgroup などシステムレベルの設定が必要なため |
+共通スキルは `config/agents/skills/` に置き、`agent-skills-nix` で配信する。
 
-### npm install の install 先
-`npm install -g` はデフォルトで Node.js インストール先（Nix ストア）に書き込もうとするが、Nix ストアは read-only のため失敗する。
-`--prefix "$HOME/.local"` を指定して `~/.local/bin/` にインストールする。
+- source: `flake.nix` の `agent-skills-src = path:./config/agents/skills`
+- `home/agent-skills.nix` で `skills.enableAll = true`
+- 配信先は Claude / Gemini / antigravity
 
-### Windows バイナリが PATH に混入する問題
-WSL2 では `/mnt/c/` 以下の Windows バイナリも PATH に現れる。
-`command -v gemini` で既インストール確認すると Windows 側のバイナリを誤検知するため、
-`~/.local/bin/gemini` の**ファイル存在確認**で判定する。
+### Nix 管理のカスタムパッケージ
 
-### npiperelay ブリッジの役割
-Linux ネイティブ ssh や `op` CLI など `SSH_AUTH_SOCK` を参照するツールが
-1Password SSH Agent を使えるようにするためのブリッジ。
-インストール先は `~/.local/bin/npiperelay.exe`。
-これにより `ssh.exe` エイリアスは不要となり、`~/.ssh/config`（home-manager 管理）が
-すべての SSH 接続に適用される。Git も `core.sshCommand` を設定せず Linux ssh を使用する。
-- Windows 側: `\\.\pipe\openssh-ssh-agent`（1Password が提供）
-- Linux 側: `/tmp/ssh-agent-1p.sock`（`$SSH_AUTH_SOCK` に設定）
+`home/pkgs/` で nixpkgs 未収録ツールを定義する。
 
-### shell.nix の Shell 関数
+- `ccusage`: Claude API 使用量確認
+- `difit`: Git 差分ビューア
+- `mo`: Markdown ビューア
+- `rtk`: Claude Code トークン削減プロキシ
 
-`home/shell.nix` には以下の関数が定義されている:
+NPM 系ツールを Nix でビルドする場合の注意:
 
-- `gclone()`: `gh repo list` の結果を fzf でインタラクティブに選択し、`ghq get` で SSH クローンする
-- `gcd()`: `ghq list` の結果を fzf でインタラクティブに選択し、そのディレクトリに cd する
+- Nix サンドボックス内ではネットワークアクセス不可
+- `pnpm run build` 全体ではなく bundler を直接呼ぶほうが安定する場合がある
+- PNPM の壊れた symlink は `find -xtype l -delete` で掃除が必要なことがある
 
-### git.nix の設定
+### npiperelay ブリッジ
 
-- `core.editor = nvim`（コミットメッセージ等のエディタ）
-- `diff.pager = delta`（side-by-side diff ビューア）
-- `merge.conflictstyle = zdiff3`（マージコンフリクトの表示形式）
-- `ghq.root = ~/codes`（ghq のリポジトリ管理ルート）
+Linux ネイティブ `ssh` や `op` から 1Password SSH Agent を使うため、Windows named pipe を `/tmp/ssh-agent-1p.sock` にブリッジする。
 
-### kubeconfig の管理
-kubeconfig にはシークレット情報が含まれるため、リポジトリには含めない。
-1Password にドキュメントタイプで保存し、`scripts/export-kubeconfig.sh` で `~/.kube/config` にエクスポートする。
+- Windows 側: `\\.\pipe\openssh-ssh-agent`
+- Linux 側: `/tmp/ssh-agent-1p.sock`
+- `home/wsl.nix` が `SSH_AUTH_SOCK` を設定
+- `core.sshCommand` は上書きせず、Linux 側の `~/.ssh/config` をそのまま使う
 
-### starship format 文字列の書き方
-Nix `''` (indented) 文字列では `\` はエスケープ処理されずリテラルになる。
-行末の `\` + 改行が starship の設定ファイルに `\<改行>` として書き込まれ、starship がパースエラーを起こす。
-starship の format は Nix `"..."` (double-quoted) 文字列で1行に書き、改行が必要な箇所には `\n` を使う。
+### npm install の配置先
+
+Nix ストアは read-only のため、`npm install -g` はそのままだと失敗する。
+グローバル導入時は `--prefix "$HOME/.local"` を使う。
 
 ### flake.lock の管理
 
-`flake.lock` はリポジトリに含め、nixpkgs・home-manager のリビジョンを固定する。
-これにより `bootstrap.sh` による新規マシンセットアップが既存マシンと同一のビルド結果になる。
+`flake.lock` はコミットして固定する。
 
-- **更新するとき**: `nix flake update` を実行し、生成された `flake.lock` の変更をコミットする
-- **特定の input だけ更新**: `nix flake update nixpkgs` のように input 名を指定する
-- **意図しない更新を防ぐ**: `flake.lock` を変更せずに `home-manager switch` を実行すれば、固定バージョンのまま反映される
+- 全更新: `nix flake update`
+- 個別更新: `nix flake update nixpkgs`
+- 反映: `home-manager switch --flake ".#ryosh"` または `nix run .#switch`
+
+## 変更時の実務ルール
+
+### ドキュメント更新時
+
+README / AGENTS の両方に同じ事実が書かれている箇所は、片方だけ直さない。
+特に次の差分は古くなりやすいので注意する。
+
+- `scripts/units/` の実在ファイル一覧
+- Claude Code の管理方式
+- `config/agents/skills/` の存在
+- `home/gemini.nix` のマージ管理
+- `home/pkgs/` のパッケージ一覧
+
+### Home Manager モジュールを追加したとき
+
+最低限、次を同期して更新する。
+
+1. `home/default.nix` の `imports`
+2. README の構成説明
+3. この `AGENTS.md` のアーキテクチャ節
+
+### スクリプト変更時
+
+`scripts/bootstrap.sh` と `scripts/units/` の順序・役割が変わった場合は、README とこのファイルの両方を更新する。
 
 ## 設定変更の手順
 
 ```bash
-# 設定を編集後、反映する（flake.lock のバージョン固定を維持）
 home-manager switch --flake ".#ryosh"
+```
 
-# パッケージを追加する場合
-# home/packages.nix を編集してから上記コマンドを実行
+または:
 
-# 依存関係（nixpkgs・home-manager）を最新に更新する場合
+```bash
+nix run .#switch
+```
+
+依存更新を伴う場合:
+
+```bash
 nix flake update
 git add flake.lock
 git commit -m "chore: nix flake update"
 home-manager switch --flake ".#ryosh"
 ```
 
-## SSH 公開鍵の管理
+## SSH 公開鍵と kubeconfig
 
-SSH 公開鍵は `~/.ssh/imported_keys/` に置かれ、リポジトリには含まない。
-秘密鍵は 1Password で管理し、ファイルには保存しない。
+- SSH 公開鍵は `~/.ssh/imported_keys/` に置き、リポジトリには含めない
+- kubeconfig は `~/.kube/config` に置き、リポジトリには含めない
+- 秘密鍵は 1Password 管理で、ファイルに保存しない
 
-新しいキーを追加する際は:
-1. 1Password にキーを保存し `dotfiles` タグを付ける
-2. `home/ssh.nix` に対応する `matchBlocks` エントリを追加する
-3. `home-manager switch` で反映する
-4. `bash scripts/export-ssh-keys.sh` で公開鍵をエクスポートする
+再エクスポート:
+
+```bash
+op signin
+bash scripts/export-ssh-keys.sh
+bash scripts/export-kubeconfig.sh
+```
