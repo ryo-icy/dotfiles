@@ -98,7 +98,7 @@ Gemini CLI は `scripts/units/07-gemini.sh` で `npm install -g --prefix "$HOME/
 
 - source: `flake.nix` の `agent-skills-src = path:./config/agents/skills`
 - `home/agent-skills.nix` で `skills.enableAll = true`
-- 配信先は Claude / Gemini / antigravity
+- 配信先は Claude / Gemini (via agents) / Codex / Copilot
 
 ### Nix 管理のカスタムパッケージ
 

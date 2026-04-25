@@ -26,26 +26,23 @@
 
 このリポジトリでは現在、以下を有効化している。
 
-- `agents`
+- `agents` (Gemini CLI / Codex 共用)
 - `codex`
 - `claude`
 - `copilot`
-- `gemini`
-- `antigravity`
 
 ## 既定パスの目安
 
 upstream README ベースの既定パス:
 
-- `agents`: `$HOME/.agents/skills`
+- `agents`: `$HOME/.agents/skills` (Gemini CLI が既定で参照)
 - `codex`: `${CODEX_HOME:-$HOME/.codex}/skills`
 - `claude`: `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills`
 - `copilot`: `$HOME/.copilot/skills`
-- `gemini`: `$HOME/.gemini/skills`
-- `antigravity`: `$HOME/.gemini/antigravity/skills`
 
 補足:
 
+- Gemini CLI は `~/.agents/skills` と `~/.gemini/skills` の両方を参照し、前者を優先するため、競合回避のため `agents` のみを使用する
 - Codex はバージョンや設定によって `~/.agents/skills` 系と `~/.codex/skills` 系の両方がありうるため、このリポジトリでは `agents` と `codex` を両方有効化している
 
 ## 反映方法
