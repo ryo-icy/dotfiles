@@ -18,8 +18,8 @@
       codex.enable = true;
       claude.enable = true;
       copilot.enable = true;
-      gemini.enable = true;
-      antigravity.enable = true;
+      gemini.enable = false; # ~/.agents/skills と競合するため無効化
+      antigravity.enable = false; # 同上
     };
   };
 }
