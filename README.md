@@ -167,7 +167,7 @@ bash scripts/units/07-gemini.sh
 - グローバル `core.hooksPath` は設定しない
 - `prek install` は実行した clone の `.git/hooks/` にだけ反映される
 - hook のルール自体は各リポジトリの `prek.toml` などで管理する
-- この dotfiles 自体は `.pre-commit-config.yaml` で shell / YAML チェックと `main` 直コミット防止を定義する
+- この dotfiles 自体は `.pre-commit-config.yaml` で shell / YAML の lint、`shfmt` による shell format、改行・空白の正規化、`main` 直コミット防止を定義する
 
 このリポジトリで hook を有効化する例:
 
@@ -175,6 +175,14 @@ bash scripts/units/07-gemini.sh
 just setup
 just lint
 ```
+
+`just lint` では全ファイルに対して次を実行する。
+
+- YAML の構文チェック
+- shell script の `shellcheck`
+- shell script の `shfmt`
+- 末尾空白、最終改行、LF 改行への正規化
+- `main` ブランチへの直接コミット防止
 
 ## 1Password 連携
 

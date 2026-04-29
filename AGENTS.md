@@ -146,7 +146,7 @@ Nix ストアは read-only のため、`npm install -g` はそのままだと失
 - グローバル `core.hooksPath` は設定しない
 - `prek install` は各リポジトリの `.git/hooks/` に対して個別に実行する
 - hook の共有は `prek.toml` など repo 内の設定ファイルで行い、hook 実体は clone ローカルに閉じる
-- この dotfiles 自体は `.pre-commit-config.yaml` で shell / YAML チェックと `main` 直コミット防止を定義する
+- この dotfiles 自体は `.pre-commit-config.yaml` で shell / YAML の lint、`shfmt` による shell format、改行・空白の正規化、`main` 直コミット防止を定義する
 - repo 内の定型操作は `justfile` に集約し、hook 導入と全件チェックは `just setup` / `just lint` を使う
 
 ## 変更時の実務ルール
