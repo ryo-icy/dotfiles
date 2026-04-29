@@ -24,6 +24,9 @@
     inputs.nix-claude-code.packages.${pkgs.system}.claude  # Claude Code CLI（公式バイナリ、nix-claude-code 経由）
     codex              # OpenAI Codex CLI（Rust 版ターミナルコーディングエージェント）
     github-copilot-cli # GitHub Copilot CLI（ターミナル向けコーディングエージェント）
+    prek               # Git hook マネージャ（repo ごとに `prek install` して使う）
+    oxfmt              # Oxlint / Biome 系の整形ツール
+    just               # リポジトリ用タスクランナー
     neovim             # モダンな Vim 互換テキストエディタ
     delta              # git diff ビューア（シンタックスハイライト・サイドバイサイド）
     # lazygit は home/lazygit.nix で programs.lazygit として管理（delta 連携のため）
