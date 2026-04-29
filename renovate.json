@@ -10,6 +10,9 @@
   "nix": {
     "enabled": false
   },
+  "pre-commit": {
+    "enabled": true
+  },
   "lockFileMaintenance": {
     "enabled": false
   },
