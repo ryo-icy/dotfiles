@@ -1,21 +1,12 @@
 # dotfiles
 
-WSL2 Ubuntu 環境を Nix + home-manager で宣言的に管理する dotfiles リポジトリ。
-`flake.lock` で依存を固定し、`scripts/bootstrap.sh` と `home-manager switch` で同じ環境を再現する。
+WSL2/Ubuntu 環境を Nix + [home-manager](https://github.com/nix-community/home-manager) で宣言的に管理する dotfiles リポジトリ。
 
-## 概要
-
-- シェル、Git、SSH、Neovim、Yazi、Lazygit、prek を home-manager で管理
-- Claude Code は `nix-claude-code` 経由で Nix 管理
-- Gemini CLI は `~/.local/bin/` に npm で導入
-- 1Password SSH Agent を `npiperelay.exe + socat` で WSL2 にブリッジ
-- エージェント用スキルは `agent-skills-nix` で Claude / Gemini (via agents) / Codex / Copilot に配信
-
-## 構成
+## リポジトリ構成
 
 ```text
 dotfiles/
-├── justfile                  # repo 用タスク（hook 導入、lint）
+├── justfile                   # repo 用タスク（hook 導入、lint）
 ├── .pre-commit-config.yaml    # prek / pre-commit 用 hook 定義
 ├── flake.nix                  # flake input / homeConfiguration / devShell / apps
 ├── home/
@@ -48,7 +39,7 @@ dotfiles/
 │   │   └── skills/            # branch / commit / pr / review-plan
 │   └── nvim/init.lua
 └── scripts/
-    ├── bootstrap.sh
+    ├── bootstrap.sh           # セットアップスクリプト
     ├── export-ssh-keys.sh
     ├── export-kubeconfig.sh
     └── units/
@@ -176,7 +167,7 @@ bash scripts/units/07-gemini.sh
 - グローバル `core.hooksPath` は設定しない
 - `prek install` は実行した clone の `.git/hooks/` にだけ反映される
 - hook のルール自体は各リポジトリの `prek.toml` などで管理する
-- この dotfiles 自体は `.pre-commit-config.yaml` で shell / YAML チェックと `main` 直コミット防止を定義する
+- この dotfiles 自体は `.pre-commit-config.yaml` で shell / YAML の lint、`shfmt` による shell format、改行・空白の正規化、`main` 直コミット防止を定義する
 
 このリポジトリで hook を有効化する例:
 
@@ -184,6 +175,14 @@ bash scripts/units/07-gemini.sh
 just setup
 just lint
 ```
+
+`just lint` では全ファイルに対して次を実行する。
+
+- YAML の構文チェック
+- shell script の `shellcheck`
+- shell script の `shfmt`
+- 末尾空白、最終改行、LF 改行への正規化
+- `main` ブランチへの直接コミット防止
 
 ## 1Password 連携
 
@@ -241,30 +240,28 @@ bash scripts/export-kubeconfig.sh my-kubeconfig
 
 NPM 系ツールを Nix でビルドする場合は、Nix サンドボックスのネットワーク制限と PNPM の壊れた symlink に注意する。
 
-## 便利コマンド
+## 開発環境
 
-- `gclone`: GitHub リポジトリを fzf で選んで `ghq get`
-- `gcd`: `ghq list` から選んで移動
-- `yy`: yazi 終了時に移動先へ `cd`
-- `lg`: lazygit
-- `just`: repo 用タスクランナー（`just setup`, `just lint`）
-- `prek`: repo ごとの Git hook をインストール・実行
-- `ccu`, `ccum`, `ccus`: `ccusage` ショートカット
-
-## 検証
+devShellで独立した開発環境を定義しています。以下のコマンドで有効にすることが可能です。
 
 ```bash
-home-manager switch --flake ".#ryosh"
+# Python開発環境
+nix develop .#python
 
-claude --version
-codex --version
-prek --version
-oxfmt --version
-just --version
-gemini --version
-docker --version
+# Rust開発環境
+nix develop .#rust
+```
 
-type gclone gcd yy
-ls -la ~/.claude ~/.gemini ~/.config/nvim
-SSH_AUTH_SOCK=/tmp/ssh-agent-1p.sock ssh-add -l
+### direnv
+
+各プロジェクトのディレクトリに `.envrc` を作成することで、ディレクトリ移動時に自動的に開発環境を有効にすることが可能です。
+
+```bash
+# テンプレートを使用する場合
+echo "use flake 'github:ryo-icy/dotfiles#rust'" > .envrc
+direnv allow
+
+# プロジェクト個別のflakeが存在する場合
+echo "use flake" > .envrc
+direnv allow
 ```
