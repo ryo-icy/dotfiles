@@ -38,11 +38,11 @@ pkgs.stdenv.mkDerivation {
   installPhase = ''
     runHook preInstall
     mkdir -p $out/lib/difit $out/bin
-    
+
     # 実行に必要なファイルをコピー
     # package.json, dist, node_modules, packages が必要
     cp -r dist node_modules package.json packages $out/lib/difit/
-    
+
     # 壊れたシンボリックリンクを削除
     find $out/lib/difit/node_modules -xtype l -delete
 

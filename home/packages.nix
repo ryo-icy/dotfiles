@@ -8,7 +8,7 @@
     # yazi は shell integration の都合で home/yazi.nix 側で管理する。
     zoxide
     tree
-    ghq
+    ripgrep
 
     # データ処理・ユーティリティ
     jq
@@ -40,6 +40,7 @@
     (import ./pkgs/difit.nix { inherit pkgs; })
     (import ./pkgs/mo.nix { inherit pkgs; })
     gh
+    ghq
     shellcheck
 
     # インフラ・クラウド

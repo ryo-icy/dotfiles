@@ -9,11 +9,11 @@ if command -v nix &>/dev/null || [ -e /nix/var/nix/profiles/default/bin/nix ]; t
 else
   echo "  Installing Nix (Determinate Systems installer)..."
   if [ "${CI:-}" = "true" ]; then
-    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
-      | sh -s -- install linux --no-confirm --init none
+    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix |
+      sh -s -- install linux --no-confirm --init none
   else
-    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
-      | sh -s -- install --no-confirm
+    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix |
+      sh -s -- install --no-confirm
   fi
   echo "  Installed"
 fi

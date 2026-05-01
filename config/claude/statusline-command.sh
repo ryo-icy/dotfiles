@@ -30,19 +30,19 @@ color_for_pct() {
 # プログレスバーを生成する関数（10セグメント）
 progress_bar() {
   pct="$1"
-  filled=$(( pct / 10 ))
+  filled=$((pct / 10))
   [ "$filled" -gt 10 ] && filled=10
-  empty=$(( 10 - filled ))
+  empty=$((10 - filled))
   bar=""
   i=0
   while [ "$i" -lt "$filled" ]; do
     bar="${bar}▰"
-    i=$(( i + 1 ))
+    i=$((i + 1))
   done
   i=0
   while [ "$i" -lt "$empty" ]; do
     bar="${bar}▱"
-    i=$(( i + 1 ))
+    i=$((i + 1))
   done
   printf "%s" "$bar"
 }
@@ -50,16 +50,16 @@ progress_bar() {
 # Unix timestamp を Asia/Tokyo の日時文字列に変換する関数
 format_reset_time() {
   ts="$1"
-  fmt="$2"  # date フォーマット文字列
+  fmt="$2" # date フォーマット文字列
   if [ -z "$ts" ] || [ "$ts" = "null" ]; then
     printf "%s" "-"
     return
   fi
-  TZ="Asia/Tokyo" date -d "@${ts}" +"${fmt}" 2>/dev/null \
-    || TZ="Asia/Tokyo" date -r "${ts}" +"${fmt}" 2>/dev/null \
-    || date -u -d "@$(( ts + 32400 ))" +"${fmt}" 2>/dev/null \
-    || date -u -r "$(( ts + 32400 ))" +"${fmt}" 2>/dev/null \
-    || printf "%s" "-"
+  TZ="Asia/Tokyo" date -d "@${ts}" +"${fmt}" 2>/dev/null ||
+    TZ="Asia/Tokyo" date -r "${ts}" +"${fmt}" 2>/dev/null ||
+    date -u -d "@$((ts + 32400))" +"${fmt}" 2>/dev/null ||
+    date -u -r "$((ts + 32400))" +"${fmt}" 2>/dev/null ||
+    printf "%s" "-"
 }
 
 # stdin から JSON を読み込む
@@ -85,7 +85,7 @@ if [ -n "$cwd" ]; then
   diff_stat=$(GIT_OPTIONAL_LOCKS=0 git -C "$cwd" diff --shortstat HEAD 2>/dev/null)
   if [ -n "$diff_stat" ]; then
     ins=$(printf "%s" "$diff_stat" | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
-    del=$(printf "%s" "$diff_stat" | grep -oE '[0-9]+ deletion'  | grep -oE '[0-9]+' || echo "0")
+    del=$(printf "%s" "$diff_stat" | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
     [ -z "$ins" ] && ins="0"
     [ -z "$del" ] && del="0"
     git_diff="${COLOR_GREEN}+${ins}${COLOR_RESET}${COLOR_GRAY}/${COLOR_RESET}${COLOR_RED}-${del}${COLOR_RESET}"
@@ -97,8 +97,8 @@ fi
 # 1行目: git ブランチ名
 branch=""
 if [ -n "$cwd" ]; then
-  branch=$(GIT_OPTIONAL_LOCKS=0 git -C "$cwd" symbolic-ref --short HEAD 2>/dev/null \
-           || GIT_OPTIONAL_LOCKS=0 git -C "$cwd" rev-parse --short HEAD 2>/dev/null)
+  branch=$(GIT_OPTIONAL_LOCKS=0 git -C "$cwd" symbolic-ref --short HEAD 2>/dev/null ||
+    GIT_OPTIONAL_LOCKS=0 git -C "$cwd" rev-parse --short HEAD 2>/dev/null)
 fi
 
 # 1行目を組み立てて出力

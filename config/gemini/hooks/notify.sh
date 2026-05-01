@@ -2,10 +2,10 @@
 # Gemini CLI Windows トースト通知スクリプト
 
 if [[ $# -ge 1 ]]; then
-    MESSAGE="$1"
+  MESSAGE="$1"
 else
-    INPUT=$(cat -)
-    MESSAGE=$(echo "$INPUT" | jq -r '.message // "通知があります"' 2>/dev/null || echo "通知があります")
+  INPUT=$(cat -)
+  MESSAGE=$(echo "$INPUT" | jq -r '.message // "通知があります"' 2>/dev/null || echo "通知があります")
 fi
 
 TITLE="Gemini CLI"
