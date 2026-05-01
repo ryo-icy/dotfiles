@@ -1,183 +1,82 @@
 # AGENTS.md
 
-このファイルは AI Agent（Claude Code / Codex / Gemini）がこのリポジトリで作業する際の指示を定義する。
+このファイルは、このリポジトリで作業する AI Agent 向けの運用ルールを定義する。
 
 ## 言語設定
 
-- **会話**: 常に日本語で行う
-- **コード内のコメント**: 日本語で記述する
-- **エラーメッセージの説明**: 日本語で行う
-- **ドキュメント**: 日本語で生成する
+- 会話は常に日本語で行う。
+- コード内コメント、エラーメッセージの説明、ドキュメントも日本語で扱う。
 
-## リポジトリ概要
+## このリポジトリで優先すること
 
-WSL2 Ubuntu 環境を Nix + home-manager で宣言的に管理する dotfiles リポジトリ。
-`flake.lock` による依存固定、`bootstrap.sh` による初期構築、`home-manager switch` による日常更新を前提にしている。
+このリポジトリは、WSL2 Ubuntu 環境を Nix と home-manager で宣言的に管理するための正本である。初回構築は `scripts/bootstrap.sh`、日常更新は `home-manager switch` または `nix run .#switch` を前提とする。
 
-## 現在のアーキテクチャ
+ルートのドキュメントは高レベルの方針だけを書く。あるディレクトリ固有の運用や判断基準は、そのディレクトリの `README.md` または `AGENTS.md` に置き、上位ドキュメントへ詳細を積み増さない。
 
-```text
-justfile                  # repo 用タスク（hook 導入、lint）
-.pre-commit-config.yaml   # prek / pre-commit 用 hook 定義
-flake.nix              # flake input / homeConfiguration / devShell / apps
-home/
-  default.nix          # ルートモジュール（imports, username, stateVersion）
-  packages.nix         # Nix 管理パッケージ
-  shell.nix            # zsh 設定、alias、gclone/gcd
-  git.nix              # git 設定（delta, ghq.root, nvim）
-  starship.nix         # starship 設定
-  ssh.nix              # SSH 設定
-  wsl.nix              # SSH_AUTH_SOCK, npiperelay ブリッジ、PATH
-  claude.nix           # ~/.claude 配下の設定・hook 配置
-  gemini.nix           # ~/.gemini 配下の設定・hook・policy 配置
-  agent-skills.nix     # agent-skills の配信設定
-  nvim.nix             # ~/.config/nvim/init.lua 配置
-  yazi.nix             # yazi 設定と zsh 統合
-  lazygit.nix          # lazygit と delta の連携
-  pkgs/                # カスタムパッケージ (ccusage, difit, mo, rtk)
-config/
-  claude/
-    settings.json
-    statusline-command.sh
-    hooks/
-      notify.sh
-      rtk-rewrite.sh
-  gemini/
-    settings.json
-    hooks/
-      notify.sh
-    policies/
-      claude-sync.toml
-  agents/
-    skills/
-      branch/
-      commit/
-      pr/
-      review-plan/
-  nvim/
-    init.lua
-scripts/
-  bootstrap.sh
-  export-ssh-keys.sh
-  export-kubeconfig.sh
-  units/
-    01-backup.sh
-    02-docker.sh
-    03-nix.sh
-    04-npiperelay.sh
-    05-home-manager.sh
-    07-gemini.sh
-    08-ssh-keys.sh
-    09-chsh.sh
-    10-kubeconfig.sh
-```
+## ドキュメント原則
+
+- `README.md` は人間向け、`AGENTS.md` は AI Agent 向けとして役割を分ける。
+- `CLAUDE.md` や `GEMINI.md` を置く場合は別管理せず、`AGENTS.md` へのシンボリックリンクにする。
+- tree 形式やファイル一覧をドキュメントに書かない。構造説明が必要なら prose で責務だけを書く。
+- 設計理由、制約、正本、変更時の非自明な手順を書く。コードを読めば分かる説明は避ける。
+- ある変更が特定ディレクトリだけに閉じるなら、ルートではなくそのディレクトリのドキュメントを更新する。
 
 ## 重要な設計判断
 
-### home.stateVersion
+### Home Manager
 
-`home/default.nix` の `home.stateVersion` は初回 `home-manager switch` 時点の互換性基準であり、**以後変更しない**。
-パッケージ更新用の値ではない。
+- `home.stateVersion` は初回 `home-manager switch` 時点の互換性基準であり、以後変更しない。
+- 新しい Home Manager モジュールを追加したら、`home/default.nix` の import と関連ドキュメントを同期する。
 
-### Claude Code は Nix 管理
+### Claude Code
 
-Claude Code は `flake.nix` の `nix-claude-code` input を通して Nix 管理する。
-`scripts/units/06-claude.sh` は存在しない。Claude Code の導入と更新は `05-home-manager.sh` で行う。
+- Claude Code は `nix-claude-code` input 経由で Nix 管理する。
+- Claude Code の導入や更新のために `scripts/units/06-claude.sh` を前提にしない。導入は Home Manager 側で扱う。
 
-- `home/packages.nix` で `inputs.nix-claude-code.packages.${pkgs.system}.claude` を参照する
-- auto-updater ではなく `flake.lock` 更新でバージョンが進む
+### Gemini CLI
 
-### Gemini CLI は Nix 管理外
+- Gemini CLI は Nix 管理外で、`npm install -g --prefix "$HOME/.local"` により `~/.local/bin` へ導入する。
+- WSL2 では Windows 側の `gemini` が PATH に混入しうるため、存在確認を `command -v gemini` だけで済ませない。
+- `~/.gemini/settings.json` は Gemini が認証情報を書き込むため、symlink ではなくマージ方式で扱う。
 
-Gemini CLI は `scripts/units/07-gemini.sh` で `npm install -g --prefix "$HOME/.local"` により `~/.local/bin/` へ入れる。
+### Codex
 
-- WSL2 では Windows 側の `gemini` が PATH に混入するため、存在確認は `command -v` ではなく `~/.local/bin/gemini` を使う
-- `~/.gemini/settings.json` は Gemini が認証情報を書き込むため、symlink ではなくマージ方式で管理する
+- Codex CLI 自体は Nix 管理パッケージとして扱う。
+- `~/.codex/config.toml` をこのリポジトリで管理する場合、Codex が `projects` や `notice` を追記する前提で、symlink ではなくマージ方式を使う。
 
-### agent-skills の配信
+### Agent Skills
 
-共通スキルは `config/agents/skills/` に置き、`agent-skills-nix` で配信する。
+- 共通スキルの正本は `config/agents/skills/` に置く。
+- 配信の有効化や target の切り替えは Home Manager 側の設定を正本とする。
+- 配信先やスキル運用の詳細は `config/agents/README.md` で管理する。
 
-- source: `flake.nix` の `agent-skills-src = path:./config/agents/skills`
-- `home/agent-skills.nix` で `skills.enableAll = true`
-- 配信先は Claude / Gemini (via agents) / Codex / Copilot
+### Git Hook
+
+- `prek` 本体は Nix 管理するが、hook 自体は各リポジトリで個別に導入する。
+- グローバル `core.hooksPath` は設定しない。
+- このリポジトリの定型操作は `just setup` と `just lint` を入口にする。
+
+### 1Password / WSL2
+
+- Linux ネイティブの `ssh` や `op` から 1Password SSH Agent を使うため、Windows 側 named pipe を Linux 側ソケットへブリッジする。
+- `core.sshCommand` を上書きして回避しない。Linux 側の `~/.ssh/config` と `SSH_AUTH_SOCK` を前提に保つ。
 
 ### Nix 管理のカスタムパッケージ
 
-`home/pkgs/` で nixpkgs 未収録ツールを定義する。
+- nixpkgs 未収録ツールは `home/pkgs/` で管理する。
+- NPM 系ツールを Nix でビルドする場合は、サンドボックスのネットワーク制限と壊れた symlink の扱いに注意する。
 
-- `ccusage`: Claude API 使用量確認
-- `difit`: Git 差分ビューア
-- `mo`: Markdown ビューア
-- `rtk`: Claude Code トークン削減プロキシ
+## 変更時の判断基準
 
-NPM 系ツールを Nix でビルドする場合の注意:
+- `README.md` と `AGENTS.md` に同じ事実を書いている場合は、片方だけ更新しない。
+- `bootstrap.sh` や `scripts/units/` の順序、役割、前提が変わったら両方のドキュメントを更新する。
+- ファイルを追加しただけではドキュメント更新は不要。設計意図、責務、導線が変わるときだけ更新する。
+- 新しいディレクトリに固有ルールが生まれたら、そのディレクトリへ `README.md` または `AGENTS.md` を追加する。
+- 他人の未コミット変更がある前提で作業し、依頼されていない差分を戻さない。
 
-- Nix サンドボックス内ではネットワークアクセス不可
-- `pnpm run build` 全体ではなく bundler を直接呼ぶほうが安定する場合がある
-- PNPM の壊れた symlink は `find -xtype l -delete` で掃除が必要なことがある
+## 変更時の実務メモ
 
-### npiperelay ブリッジ
-
-Linux ネイティブ `ssh` や `op` から 1Password SSH Agent を使うため、Windows named pipe を `/tmp/ssh-agent-1p.sock` にブリッジする。
-
-- Windows 側: `\\.\pipe\openssh-ssh-agent`
-- Linux 側: `/tmp/ssh-agent-1p.sock`
-- `home/wsl.nix` が `SSH_AUTH_SOCK` を設定
-- `core.sshCommand` は上書きせず、Linux 側の `~/.ssh/config` をそのまま使う
-
-### npm install の配置先
-
-Nix ストアは read-only のため、`npm install -g` はそのままだと失敗する。
-グローバル導入時は `--prefix "$HOME/.local"` を使う。
-
-### flake.lock の管理
-
-`flake.lock` はコミットして固定する。
-
-- 全更新: `nix flake update`
-- 個別更新: `nix flake update nixpkgs`
-- 反映: `home-manager switch --flake ".#ryosh"` または `nix run .#switch`
-
-### Git hook の管理方針
-
-`prek` 本体は `home/packages.nix` で Nix 管理するが、Git hook 自体は dotfiles でグローバル配布しない。
-
-- グローバル `core.hooksPath` は設定しない
-- `prek install` は各リポジトリの `.git/hooks/` に対して個別に実行する
-- hook の共有は `prek.toml` など repo 内の設定ファイルで行い、hook 実体は clone ローカルに閉じる
-- この dotfiles 自体は `.pre-commit-config.yaml` で shell / YAML の lint、`shfmt` による shell format、改行・空白の正規化、`main` 直コミット防止を定義する
-- repo 内の定型操作は `justfile` に集約し、hook 導入と全件チェックは `just setup` / `just lint` を使う
-
-## 変更時の実務ルール
-
-### ドキュメント更新時
-
-README / AGENTS の両方に同じ事実が書かれている箇所は、片方だけ直さない。
-特に次の差分は古くなりやすいので注意する。
-
-- `scripts/units/` の実在ファイル一覧
-- Claude Code の管理方式
-- `config/agents/skills/` の存在
-- `home/gemini.nix` のマージ管理
-- `home/pkgs/` のパッケージ一覧
-- `prek` の導入方針
-- `.pre-commit-config.yaml` の運用方針
-- `justfile` のタスク定義
-
-### Home Manager モジュールを追加したとき
-
-最低限、次を同期して更新する。
-
-1. `home/default.nix` の `imports`
-2. README の構成説明
-3. この `AGENTS.md` のアーキテクチャ節
-
-### スクリプト変更時
-
-`scripts/bootstrap.sh` と `scripts/units/` の順序・役割が変わった場合は、README とこのファイルの両方を更新する。
-
-## 設定変更の手順
+設定反映:
 
 ```bash
 home-manager switch --flake ".#ryosh"
@@ -198,13 +97,7 @@ git commit -m "chore: nix flake update"
 home-manager switch --flake ".#ryosh"
 ```
 
-## SSH 公開鍵と kubeconfig
-
-- SSH 公開鍵は `~/.ssh/imported_keys/` に置き、リポジトリには含めない
-- kubeconfig は `~/.kube/config` に置き、リポジトリには含めない
-- 秘密鍵は 1Password 管理で、ファイルに保存しない
-
-再エクスポート:
+シークレットの再配置:
 
 ```bash
 op signin
