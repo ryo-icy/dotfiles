@@ -34,8 +34,6 @@
       update-gemini = "npm install -g @google/gemini-cli --prefix \"$HOME/.local\"";
     };
 
-    # NVM initialization removed — Node.js is managed by Nix (see packages.nix)
-
     initContent = ''
       # kubectl オートコンプリート
       source <(kubectl completion zsh)
@@ -47,11 +45,20 @@
         [[ -n "$repo" ]] && ghq get "$repo"
       }
 
-      # ghq 管理のリポジトリを fzf で選択して cd
+      # ghq 管理のリポジトリを fzf で選択して cd（引数があればあいまい検索）
       function gcd() {
-        local dir
-        dir=$(ghq list | fzf)
-        [[ -n "$dir" ]] && cd "$(ghq root)/$dir"
+        local selected
+        local list
+        list=$(ghq list)
+        if [ -n "$1" ]; then
+          selected=$(echo "$list" | grep -i "$1" | head -1)
+        else
+          selected=$(echo "$list" | fzf --height=40%)
+        fi
+
+        if [ -n "$selected" ]; then
+          cd "$(ghq root)/$selected" || return
+        fi
       }
     '';
 
