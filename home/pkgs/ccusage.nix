@@ -42,10 +42,10 @@ pkgs.stdenv.mkDerivation {
   installPhase = ''
     runHook preInstall
     mkdir -p $out/lib/ccusage $out/bin
-    
+
     # 実行に必要なファイルをコピー
     cp -r apps/ccusage/dist apps/ccusage/node_modules apps/ccusage/package.json $out/lib/ccusage/
-    
+
     # 壊れたシンボリックリンクを削除
     find $out/lib/ccusage/node_modules -xtype l -delete
 

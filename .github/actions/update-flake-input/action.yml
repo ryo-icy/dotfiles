@@ -21,16 +21,16 @@ runs:
       run: |
         LOCK=$(nix flake metadata --json)
         RAW_NODE_NAME=$(echo "$LOCK" | jq -c ".locks.nodes.root.inputs.\"${{ inputs.input-name }}\"")
-        
+
         # NODE_NAME を正規化（配列なら最初の要素、文字列ならそのまま）
         NODE_NAME=$(echo "$RAW_NODE_NAME" | jq -r 'if type == "array" then .[0] else . end')
-        
+
         # follows かどうかの判定（配列かつ要素が自身のキーと異なる場合、または空の場合）
         if [ "$RAW_NODE_NAME" == "null" ] || ([ "$(echo "$RAW_NODE_NAME" | jq 'type')" == "array" ] && [ "$NODE_NAME" != "${{ inputs.input-name }}" ]); then
           echo "skip=true" >> $GITHUB_OUTPUT
           exit 0
         fi
-        
+
         REV=$(echo "$LOCK" | jq -r ".locks.nodes.\"$NODE_NAME\".locked.rev")
         REPO=$(echo "$LOCK" | jq -r ".locks.nodes.\"$NODE_NAME\".original | \"\(.owner)/\(.repo)\"")
         echo "rev=$REV" >> $GITHUB_OUTPUT
@@ -49,7 +49,7 @@ runs:
         LOCK=$(nix flake metadata --json)
         RAW_NODE_NAME=$(echo "$LOCK" | jq -c ".locks.nodes.root.inputs.\"${{ inputs.input-name }}\"")
         NODE_NAME=$(echo "$RAW_NODE_NAME" | jq -r 'if type == "array" then .[0] else . end')
-        
+
         REV=$(echo "$LOCK" | jq -r ".locks.nodes.\"$NODE_NAME\".locked.rev")
         echo "rev=$REV" >> $GITHUB_OUTPUT
         if [ "${{ steps.old-info.outputs.rev }}" == "$REV" ]; then
@@ -88,15 +88,15 @@ runs:
         git add flake.lock
         git config user.name "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        
+
         TITLE="chore(deps): update ${{ inputs.input-name }}"
         DIFF_URL="https://github.com/${{ steps.old-info.outputs.repo }}/compare/${{ steps.old-info.outputs.rev }}...${{ steps.new-info.outputs.rev }}"
         BODY="Update \`${{ inputs.input-name }}\` input.
-        
+
         - Diff: $DIFF_URL
         - Age: ${{ steps.age-check.outputs.age }} days"
 
         git commit -m "$TITLE"
         git push -f origin "$BRANCH"
-        
+
         gh pr create --title "$TITLE" --body "$BODY" --head "$BRANCH" --base main || gh pr edit "$BRANCH" --title "$TITLE" --body "$BODY"

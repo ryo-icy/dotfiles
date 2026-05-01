@@ -65,7 +65,7 @@ echo "$items" | jq -c '.[]' | while read -r item; do
     continue
   fi
 
-  echo "$pubkey" > "$dest"
+  echo "$pubkey" >"$dest"
   chmod 600 "$dest"
   echo "  Exported: $dest"
 done
