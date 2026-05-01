@@ -1,4 +1,4 @@
-{ ... }: {
+{ lib, ... }: {
   programs.zsh = {
     enable = true;
     autosuggestion.enable = true;
@@ -53,6 +53,10 @@
         dir=$(ghq list | fzf)
         [[ -n "$dir" ]] && cd "$(ghq root)/$dir"
       }
+    '';
+
+    initExtra = lib.mkAfter ''
+      command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
     '';
   };
 
