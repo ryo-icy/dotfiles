@@ -30,14 +30,14 @@
         identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
 
-      "sv04 sv04.rouzinkai.local" = {
-        hostname     = "sv04.rouzinkai.local";
+      "dev-sv01 dev-sv01.rouzinkai.local" = {
+        hostname     = "dev-sv01.rouzinkai.local";
         user         = "rouzin-user";
         identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
 
-      "sv05 sv05.rouzinkai.local" = {
-        hostname     = "sv05.rouzinkai.local";
+      "dev-sv02 dev-sv02.rouzinkai.local" = {
+        hostname     = "dev-sv02.rouzinkai.local";
         user         = "rouzin-user";
         identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
