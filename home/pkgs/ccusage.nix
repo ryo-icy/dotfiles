@@ -14,8 +14,8 @@ let
 
   pnpmDeps = pkgs.fetchPnpmDeps {
     inherit pname version src;
-    fetcherVersion = 2;
-    hash = "sha256-6RNmV4fkUCs6mVdQ5Wv2wo8hqvI0BM/T87Kb96CmeF4=";
+    fetcherVersion = 3;
+    hash = "sha256-JZ1Lki/6+T+qxA9j8MhmKKmfZ8gIiRfl5SdBym1PyBY=";
   };
 in
 pkgs.stdenv.mkDerivation {
