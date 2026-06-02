@@ -28,16 +28,18 @@
 - `home.stateVersion` は初回 `home-manager switch` 時点の互換性基準であり、以後変更しない。
 - 新しい Home Manager モジュールを追加したら、`home/default.nix` の import と関連ドキュメントを同期する。
 
-### Claude Code
+### LLM エージェント（Claude Code / Antigravity CLI / Codex / Copilot CLI）
 
-- Claude Code は `nix-claude-code` input 経由で Nix 管理する。
+- Claude Code・Antigravity CLI（旧 Gemini CLI）・Codex・Copilot CLI はすべて `llm-agents` input（github:numtide/llm-agents.nix）経由で Nix 管理する。
+- `nix-claude-code` input は削除済み。npm による Gemini CLI インストールも廃止。
 - Claude Code の導入や更新のために `scripts/units/06-claude.sh` を前提にしない。導入は Home Manager 側で扱う。
 
-### Gemini CLI
+### Antigravity CLI
 
-- Gemini CLI は Nix 管理外で、`npm install -g --prefix "$HOME/.local"` により `~/.local/bin` へ導入する。
-- WSL2 では Windows 側の `gemini` が PATH に混入しうるため、存在確認を `command -v gemini` だけで済ませない。
-- `~/.gemini/settings.json` は Gemini が認証情報を書き込むため、symlink ではなくマージ方式で扱う。
+- Antigravity CLI（バイナリ名: `agy`）は Google の Gemini CLI 後継ツール（Gemini CLI は 2026-06-18 廃止）。
+- Antigravity CLI は `~/.gemini/` を設定ディレクトリとして継承するため、設定ファイルの管理は `home/antigravity.nix` が `~/.gemini/` 配下を担う。
+- WSL2 では Windows 側の `agy` が PATH に混入しうるため、存在確認を `command -v agy` だけで済ませない。
+- `~/.gemini/settings.json` は Antigravity が認証情報を書き込むため、symlink ではなくマージ方式で扱う。
 
 ### Codex
 

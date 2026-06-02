@@ -14,7 +14,7 @@ cd ~/codes/dotfiles
 bash scripts/bootstrap.sh
 ```
 
-`bootstrap.sh` は、既存設定のバックアップ、Docker / Nix / Home Manager の導入、1Password SSH Agent ブリッジの準備、Gemini CLI の導入、公開鍵と kubeconfig の再配置までを順に実行します。
+`bootstrap.sh` は、既存設定のバックアップ、Docker / Nix / Home Manager の導入、1Password SSH Agent ブリッジの準備、公開鍵と kubeconfig の再配置までを順に実行します。LLM エージェント（Claude Code・Antigravity CLI・Codex・Copilot CLI）は Home Manager（05-home-manager.sh）が導入します。
 
 ### 既存
 
@@ -35,7 +35,7 @@ nix run .#switch
 
 - 設定変更を反映するときは `home-manager switch --flake ".#ryosh"` か `nix run .#switch` を使います。
 - 依存を更新するときは `nix flake update` のあとに `flake.lock` をコミットし、再度 `home-manager switch` を実行します。
-- Gemini CLI は Nix 管理外なので、更新は `update-gemini` または `bash scripts/units/07-gemini.sh` で行います。
+- LLM エージェントの更新は `nix flake update && home-manager switch --flake ".#ryosh"` で行います。
 - このリポジトリの Git hook は `just setup` で導入し、`just lint` でまとめて実行します。
 
 `home.stateVersion` はパッケージ更新用の値ではなく、初回アクティベーション時点の互換性基準です。更新目的で変更しないでください。

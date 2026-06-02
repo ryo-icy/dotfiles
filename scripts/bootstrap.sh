@@ -6,8 +6,7 @@
 # root では実行しないこと
 #
 # 各ユニットは単独でも実行可能:
-#   bash scripts/units/02-docker.sh    # Docker だけ再インストール
-#   bash scripts/units/06-claude.sh    # Claude CLI だけ更新 など
+#   bash scripts/units/02-docker.sh    # Docker だけ再インストール など
 
 set -euo pipefail
 
@@ -32,7 +31,6 @@ units=(
   "03-nix.sh"
   "04-npiperelay.sh"
   "05-home-manager.sh"
-  "07-gemini.sh"
   "08-ssh-keys.sh"
   "09-chsh.sh"
   "10-kubeconfig.sh"
@@ -54,5 +52,5 @@ echo "  1. シェルを再起動:         exec zsh"
 echo "  2. 1Password Agent 確認:   ssh-add.exe -l"
 echo "  3. Docker 確認:            docker run hello-world"
 echo "  4. Claude Code 確認:       claude --version  # Nix 管理（05-home-manager.sh で導入済み）"
-echo "  5. Gemini CLI 確認:        gemini --version"
+echo "  5. Antigravity CLI 確認:   agy --version"
 echo "  6. 鍵エクスポートが失敗した場合: op signin && bash scripts/units/08-ssh-keys.sh"
