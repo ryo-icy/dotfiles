@@ -19,13 +19,13 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-claude-code = {
-      url = "github:ryoppippi/nix-claude-code";
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, agent-skills-nix, agent-skills-src, rust-overlay, nix-claude-code, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, agent-skills-nix, agent-skills-src, rust-overlay, ... }@inputs:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -36,7 +36,10 @@
     in {
       homeConfigurations."ryosh" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        extraSpecialArgs = { inherit inputs; };
+        extraSpecialArgs = {
+          inherit inputs;
+          llm-agents = inputs.llm-agents.packages.${system};
+        };
         modules = [
           ./home/default.nix
           agent-skills-nix.homeManagerModules.default

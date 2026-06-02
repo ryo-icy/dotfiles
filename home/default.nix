@@ -1,13 +1,14 @@
 { ... }: {
   imports = [
     ./packages.nix
+    ./llm-agents.nix
     ./shell.nix
     ./git.nix
     ./starship.nix
     ./ssh.nix
     ./wsl.nix
     ./claude.nix
-    ./gemini.nix
+    ./antigravity.nix
     ./agent-skills.nix
     ./nvim.nix
     ./yazi.nix

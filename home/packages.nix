@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }: {
+{ pkgs, ... }: {
   home.packages = with pkgs; [
     # シェル・ファイル操作
     eza
@@ -13,7 +13,6 @@
     # データ処理・ユーティリティ
     jq
     yq
-    (import ./pkgs/ccusage.nix { inherit pkgs; })
     (import ./pkgs/rtk.nix { inherit pkgs; })
 
     # 認証・セキュリティ
@@ -22,10 +21,7 @@
     _1password-cli
 
     # 開発ツール
-    # Claude Code は nix-claude-code input 経由で導入する。
-    inputs.nix-claude-code.packages.${pkgs.system}.claude
-    codex
-    github-copilot-cli
+    # LLM エージェントは home/llm-agents.nix で管理する。
     # prek はグローバル配布せず、各リポジトリで `prek install` して使う。
     prek
     oxfmt

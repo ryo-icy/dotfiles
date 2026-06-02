@@ -18,7 +18,7 @@
     unset _1P_SOCK _RELAY
   '';
 
-  # Ensure ~/.local/bin (npiperelay.exe, claude CLI, gemini CLI) are on PATH
+  # Ensure ~/.local/bin (npiperelay.exe) is on PATH
   home.sessionPath = [
     "$HOME/.local/bin"
   ];
