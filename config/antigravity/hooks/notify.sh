@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Gemini CLI Windows トースト通知スクリプト
+# Antigravity CLI Windows トースト通知スクリプト
 
 if [[ $# -ge 1 ]]; then
   MESSAGE="$1"
@@ -8,7 +8,7 @@ else
   MESSAGE=$(echo "$INPUT" | jq -r '.message // "通知があります"' 2>/dev/null || echo "通知があります")
 fi
 
-TITLE="Gemini CLI"
+TITLE="Antigravity"
 
 # PowerShell 側でシングルクォートが壊れないようにエスケープ（' -> ''）
 SAFE_MESSAGE="${MESSAGE//\'/\'\'}"
@@ -27,6 +27,6 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "
 \$serialized = New-Object -TypeName Windows.Data.Xml.Dom.XmlDocument;
 \$serialized.LoadXml(\$xml.OuterXml);
 \$toast = [Windows.UI.Notifications.ToastNotification]::new(\$serialized);
-\$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Gemini CLI');
+\$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Antigravity');
 \$notifier.Show(\$toast)
 "

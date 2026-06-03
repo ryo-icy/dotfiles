@@ -3,12 +3,12 @@
   # Antigravity CLI は ~/.gemini/ を設定ディレクトリとして継承している
   home.file = {
     ".gemini/hooks/notify.sh" = {
-      source = ../config/gemini/hooks/notify.sh;
+      source = ../config/antigravity/hooks/notify.sh;
       executable = true;
     };
     # すべてのポリシーファイルを ~/.gemini/policies/ に配置
     ".gemini/policies" = {
-      source = ../config/gemini/policies;
+      source = ../config/antigravity/policies;
       recursive = true;
     };
   };
@@ -19,7 +19,7 @@
   home.activation.antigravitySettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     SETTINGS_DIR="$HOME/.gemini"
     SETTINGS_FILE="$SETTINGS_DIR/settings.json"
-    BASE_SETTINGS="${../config/gemini/settings.json}"
+    BASE_SETTINGS="${../config/antigravity/settings.json}"
 
     mkdir -p "$SETTINGS_DIR"
 
