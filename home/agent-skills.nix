@@ -18,8 +18,8 @@
       codex.enable = true;
       claude.enable = true;
       copilot.enable = true;
-      gemini.enable = false; # Gemini CLI は 2026-06-18 廃止のため無効
-      antigravity.enable = true; # ~/.gemini/antigravity/skills/ に配信
+      gemini.enable = true; # agy cliが.gemini/skillsを見に行く
+      antigravity.enable = false; # 上記理由でfalse
     };
   };
 }
