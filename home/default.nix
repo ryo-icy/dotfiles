@@ -13,6 +13,7 @@
     ./nvim.nix
     ./yazi.nix
     ./lazygit.nix
+    ./tmux.nix
   ];
 
   home.username = "ryosh";
