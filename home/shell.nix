@@ -33,37 +33,38 @@
 
     };
 
-    initContent = ''
-      # kubectl オートコンプリート
-      source <(kubectl completion zsh)
+    initContent = lib.mkMerge [
+      ''
+        # kubectl オートコンプリート
+        source <(kubectl completion zsh)
 
-      # GitHub リポジトリを fzf で選択して ghq でクローン（~/codes 以下）
-      function gclone() {
-        local repo
-        repo=$(gh api --paginate /user/repos --jq '.[].ssh_url' | fzf)
-        [[ -n "$repo" ]] && ghq get "$repo"
-      }
+        # GitHub リポジトリを fzf で選択して ghq でクローン（~/codes 以下）
+        function gclone() {
+          local repo
+          repo=$(gh api --paginate /user/repos --jq '.[].ssh_url' | fzf)
+          [[ -n "$repo" ]] && ghq get "$repo"
+        }
 
-      # ghq 管理のリポジトリを fzf で選択して cd（引数があればあいまい検索）
-      function gcd() {
-        local selected
-        local list
-        list=$(ghq list)
-        if [ -n "$1" ]; then
-          selected=$(echo "$list" | grep -i "$1" | head -1)
-        else
-          selected=$(echo "$list" | fzf --height=40%)
-        fi
+        # ghq 管理のリポジトリを fzf で選択して cd（引数があればあいまい検索）
+        function gcd() {
+          local selected
+          local list
+          list=$(ghq list)
+          if [ -n "$1" ]; then
+            selected=$(echo "$list" | grep -i "$1" | head -1)
+          else
+            selected=$(echo "$list" | fzf --height=40%)
+          fi
 
-        if [ -n "$selected" ]; then
-          cd "$(ghq root)/$selected" || return
-        fi
-      }
-    '';
-
-    initExtra = lib.mkAfter ''
-      command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
-    '';
+          if [ -n "$selected" ]; then
+            cd "$(ghq root)/$selected" || return
+          fi
+        }
+      ''
+      (lib.mkAfter ''
+        command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
+      '')
+    ];
   };
 
   programs.direnv = {
