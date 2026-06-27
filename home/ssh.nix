@@ -5,77 +5,101 @@
     enable = true;
     enableDefaultConfig = false;
 
-    matchBlocks = {
+    settings = {
       "github.com" = {
-        hostname     = "github.com";
-        user         = "git";
-        identityFile = "~/.ssh/imported_keys/github.com.pub";
+        Hostname     = "github.com";
+        User         = "git";
+        IdentityFile = "~/.ssh/imported_keys/github.com.pub";
       };
 
-      "sv01 sv01.rouzinkai.local" = {
-        hostname     = "sv01.rouzinkai.local";
-        user         = "rouzin-user";
-        identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      "sv01" = {
+        Hostname     = "sv01.rouzinkai.local";
+        User         = "rouzin-user";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
 
-      "sv02 sv02.rouzinkai.local" = {
-        hostname     = "sv02.rouzinkai.local";
-        user         = "rouzin-user";
-        identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      "sv02" = {
+        Hostname     = "sv02.rouzinkai.local";
+        User         = "rouzin-user";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
 
-      "sv03 sv03.rouzinkai.local" = {
-        hostname     = "sv03.rouzinkai.local";
-        user         = "rouzin-user";
-        identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      "sv03" = {
+        Hostname     = "sv03.rouzinkai.local";
+        User         = "rouzin-user";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
 
-      "dev-sv01 dev-sv01.rouzinkai.local" = {
-        hostname     = "dev-sv01.rouzinkai.local";
-        user         = "rouzin-user";
-        identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      "dev-sv01" = {
+        Hostname     = "dev-sv01.rouzinkai.local";
+        User         = "rouzin-user";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
 
-      "dev-sv02 dev-sv02.rouzinkai.local" = {
-        hostname     = "dev-sv02.rouzinkai.local";
-        user         = "rouzin-user";
-        identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      "dev-sv02" = {
+        Hostname     = "dev-sv02.rouzinkai.local";
+        User         = "rouzin-user";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
 
-      "prd-k8s-cp01 prd-k8s-cp01.rouzinkai.local" = {
-        hostname     = "prd-k8s-cp01.rouzinkai.local";
-        user         = "cloudinit";
-        identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      "prd-k8s-cp01" = {
+        Hostname     = "prd-k8s-cp01.rouzinkai.local";
+        User         = "cloudinit";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
 
-      "prd-k8s-cp02 prd-k8s-cp02.rouzinkai.local" = {
-        hostname     = "prd-k8s-cp02.rouzinkai.local";
-        user         = "cloudinit";
-        identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      "prd-k8s-cp02" = {
+        Hostname     = "prd-k8s-cp02.rouzinkai.local";
+        User         = "cloudinit";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
 
-      "prd-k8s-wk01 prd-k8s-wk01.rouzinkai.local" = {
-        hostname     = "prd-k8s-wk01.rouzinkai.local";
-        user         = "cloudinit";
-        identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      "prd-k8s-wk01" = {
+        Hostname     = "prd-k8s-wk01.rouzinkai.local";
+        User         = "cloudinit";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
 
-      "prd-k8s-wk02 prd-k8s-wk02.rouzinkai.local" = {
-        hostname     = "prd-k8s-wk02.rouzinkai.local";
-        user         = "cloudinit";
-        identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      "prd-k8s-wk02" = {
+        Hostname     = "prd-k8s-wk02.rouzinkai.local";
+        User         = "cloudinit";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      };
+
+      "dev-k8s-cp01" = {
+        Hostname     = "dev-k8s-cp01.rouzinkai.local";
+        User         = "cloudinit";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      };
+
+      "dev-k8s-cp02" = {
+        Hostname     = "dev-k8s-cp02.rouzinkai.local";
+        User         = "cloudinit";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      };
+
+      "dev-k8s-wk01" = {
+        Hostname     = "dev-k8s-wk01.rouzinkai.local";
+        User         = "cloudinit";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      };
+
+      "dev-k8s-wk02" = {
+        Hostname     = "dev-k8s-wk02.rouzinkai.local";
+        User         = "cloudinit";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
 
       "prd-tailscale-01" = {
-        hostname     = "10.0.0.232";
-        user         = "cloudinit";
-        identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+        Hostname     = "prd-tailscale-01.rouzinkai.local";
+        User         = "cloudinit";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
 
-      "prd-tailscale-02" = {
-        hostname     = "10.0.0.233";
-        user         = "cloudinit";
-        identityFile = "~/.ssh/imported_keys/rouzinkai.pub";
+      "dev-tailscale-01" = {
+        Hostname     = "dev-tailscale-01.rouzinkai.local";
+        User         = "cloudinit";
+        IdentityFile = "~/.ssh/imported_keys/rouzinkai.pub";
       };
     };
   };
