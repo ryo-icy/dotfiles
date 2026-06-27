@@ -21,18 +21,6 @@
         "type": "github"
       }
     },
-    "agent-skills-src": {
-      "flake": false,
-      "locked": {
-        "path": "./config/agents/skills",
-        "type": "path"
-      },
-      "original": {
-        "path": "./config/agents/skills",
-        "type": "path"
-      },
-      "parent": []
-    },
     "blueprint": {
       "inputs": {
         "nixpkgs": [
@@ -197,7 +185,6 @@
     "root": {
       "inputs": {
         "agent-skills-nix": "agent-skills-nix",
-        "agent-skills-src": "agent-skills-src",
         "home-manager": "home-manager_2",
         "llm-agents": "llm-agents",
         "nixpkgs": "nixpkgs",

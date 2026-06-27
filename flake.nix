@@ -1,6 +1,17 @@
 {
   description = "ryo-icy dotfiles";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://cache.numtide.com"
+      "https://ryo-icy-dotfiles.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+      "ryo-icy-dotfiles.cachix.org-1:b0DWdQSrNhcUcy0WcXH3JuAK4KqA3wGayM9T4YRdpBk="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager = {
@@ -10,10 +21,6 @@
     agent-skills-nix = {
       url = "github:Kyure-A/agent-skills-nix";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-    agent-skills-src = {
-      url = "path:./config/agents/skills";
-      flake = false;
     };
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
@@ -25,7 +32,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, agent-skills-nix, agent-skills-src, rust-overlay, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, agent-skills-nix, rust-overlay, ... }@inputs:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {

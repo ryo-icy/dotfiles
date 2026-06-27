@@ -19,6 +19,7 @@
     # socat は WSL2 で 1Password SSH Agent をブリッジするために使う。
     socat
     _1password-cli
+    cachix
 
     # 開発ツール
     # LLM エージェントは home/llm-agents.nix で管理する。

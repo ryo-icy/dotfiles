@@ -2,8 +2,7 @@
   programs.agent-skills = {
     enable = true;
     sources.base = {
-      # flake inputs に追加した "agent-skills-src" を指定
-      input = "agent-skills-src";
+      path = ../config/agents/skills;
     };
 
     # すべてのスキルを有効化

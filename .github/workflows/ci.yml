@@ -32,6 +32,26 @@ jobs:
               - 'scripts/**'
               - 'config/**/*.sh'
 
+  # Nix ビルドチェック
+  build:
+    needs: changes
+    if: needs.changes.outputs.nix == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            extra-substituters = https://cache.numtide.com https://ryo-icy-dotfiles.cachix.org
+            extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g= ryo-icy-dotfiles.cachix.org-1:b0DWdQSrNhcUcy0WcXH3JuAK4KqA3wGayM9T4YRdpBk=
+            trusted-users = root runner
+      - uses: cachix/cachix-action@v15
+        with:
+          name: ryo-icy-dotfiles
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - name: Build home-manager configuration
+        run: nix build .#homeConfigurations.ryosh.activationPackage --no-link --accept-flake-config
+
   # 軽量チェック（shellcheck）
   lint:
     needs: changes
