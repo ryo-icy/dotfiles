@@ -1,19 +1,9 @@
 {
-  "permissions": {
-    "ask": [
-      "Bash(rm *)",
-      "Bash(rtk rm *)",
-      "Bash(wget *)",
-      "Bash(rtk wget *)",
-      "Bash(curl *)",
-      "Bash(rtk curl *)",
-      "Bash(git push*)",
-      "Bash(rtk git push*)",
-      "Bash(git rm*)",
-      "Bash(rtk git rm*)",
-      "Bash(gh pr create*)",
-      "Bash(rtk gh pr create*)"
-    ],
+  "worktreeConfig": {
+    "enabled": true
+  },
+"permissions": {
+    "defaultMode": "auto",
     "deny": [
       "Bash(git reset*)",
       "Bash(rtk git reset*)",
