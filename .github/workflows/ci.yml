@@ -17,7 +17,7 @@ jobs:
       nix: ${{ steps.filter.outputs.nix }}
       shell: ${{ steps.filter.outputs.shell }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
         id: filter
         with:
@@ -38,7 +38,7 @@ jobs:
     if: needs.changes.outputs.nix == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: cachix/install-nix-action@v27
         with:
           extra_nix_config: |
@@ -58,6 +58,6 @@ jobs:
     if: needs.changes.outputs.shell == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Run shellcheck
         run: find scripts config -name "*.sh" | xargs shellcheck
