@@ -45,8 +45,10 @@ jobs:
             extra-substituters = https://cache.numtide.com
             extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
             trusted-users = root runner
+      - name: Lock local path inputs
+        run: nix flake lock --update-input agent-skills-src
       - name: Build home-manager configuration
-        run: nix build .#homeConfigurations.ryosh.activationPackage --no-link --impure --accept-flake-config
+        run: nix build .#homeConfigurations.ryosh.activationPackage --no-link --accept-flake-config
 
   # 軽量チェック（shellcheck）
   lint:
