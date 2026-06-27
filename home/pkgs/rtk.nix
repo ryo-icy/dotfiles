@@ -3,7 +3,7 @@
 let
   pname = "rtk";
   # renovate: datasource=github-releases depName=rtk-ai/rtk
-  version = "0.35.0";
+  version = "0.42.4";
 
   src = pkgs.fetchurl {
     url = "https://github.com/rtk-ai/rtk/releases/download/v${version}/rtk-x86_64-unknown-linux-musl.tar.gz";
