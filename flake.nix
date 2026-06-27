@@ -16,10 +16,6 @@
       url = "github:Kyure-A/agent-skills-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    agent-skills-src = {
-      url = "path:./config/agents/skills";
-      flake = false;
-    };
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -30,7 +26,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, agent-skills-nix, agent-skills-src, rust-overlay, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, agent-skills-nix, rust-overlay, ... }@inputs:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
