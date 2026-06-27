@@ -46,7 +46,7 @@ jobs:
             extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
             trusted-users = root runner
       - name: Build home-manager configuration
-        run: nix build .#homeConfigurations.ryosh.activationPackage --no-link
+        run: nix build .#homeConfigurations.ryosh.activationPackage --no-link --impure --accept-flake-config
 
   # 軽量チェック（shellcheck）
   lint:
