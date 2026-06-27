@@ -11,7 +11,7 @@ jobs:
     outputs:
       matrix: ${{ steps.discover.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: DeterminateSystems/nix-installer-action@v22
       - id: discover
         uses: ./.github/actions/discover-flake-inputs
@@ -27,7 +27,7 @@ jobs:
       matrix:
         input-name: ${{ fromJson(needs.discover.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: DeterminateSystems/nix-installer-action@v22
       - uses: ./.github/actions/update-flake-input
         with:
