@@ -3,7 +3,7 @@
 let
   pname = "difit";
   # renovate: datasource=github-releases depName=yoshiko-pg/difit
-  version = "4.0.7";
+  version = "5.0.2";
 
   src = pkgs.fetchFromGitHub {
     owner = "yoshiko-pg";
