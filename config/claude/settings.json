@@ -2,20 +2,7 @@
   "worktreeConfig": {
     "enabled": true
   },
-  "sandbox": {
-    "enabled": true,
-    "autoAllowBashIfSandboxed": true,
-    "excludedCommands": [
-      "git *"
-    ],
-    "network": {
-      "allowedDomains": [
-        "api.github.com",
-        "github.com"
-      ]
-    }
-  },
-  "permissions": {
+"permissions": {
     "defaultMode": "auto",
     "deny": [
       "Bash(git reset*)",
