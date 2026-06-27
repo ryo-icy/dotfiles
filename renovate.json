@@ -7,6 +7,7 @@
     "ryo-icy"
   ],
   "minimumReleaseAge": "3 days",
+  "dependencyDashboardApproval": false,
   "nix": {
     "enabled": false
   },
