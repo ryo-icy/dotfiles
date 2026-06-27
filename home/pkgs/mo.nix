@@ -3,7 +3,7 @@
 let
   pname = "mo";
   # renovate: datasource=github-releases depName=k1LoW/mo
-  version = "1.1.0";
+  version = "1.6.2";
 
   src = pkgs.fetchurl {
     url = "https://github.com/k1LoW/mo/releases/download/v${version}/mo_v${version}_linux_amd64.tar.gz";
