@@ -42,11 +42,13 @@ jobs:
       - uses: cachix/install-nix-action@v27
         with:
           extra_nix_config: |
-            extra-substituters = https://cache.numtide.com
-            extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
+            extra-substituters = https://cache.numtide.com https://ryo-icy-dotfiles.cachix.org
+            extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g= ryo-icy-dotfiles.cachix.org-1:b0DWdQSrNhcUcy0WcXH3JuAK4KqA3wGayM9T4YRdpBk=
             trusted-users = root runner
-      - name: Lock local path inputs
-        run: nix flake lock --update-input agent-skills-src
+      - uses: cachix/cachix-action@v15
+        with:
+          name: ryo-icy-dotfiles
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Build home-manager configuration
         run: nix build .#homeConfigurations.ryosh.activationPackage --no-link --accept-flake-config
 
