@@ -32,6 +32,22 @@ jobs:
               - 'scripts/**'
               - 'config/**/*.sh'
 
+  # Nix ビルドチェック
+  build:
+    needs: changes
+    if: needs.changes.outputs.nix == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            extra-substituters = https://cache.numtide.com
+            extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
+            trusted-users = root runner
+      - name: Build home-manager configuration
+        run: nix build .#homeConfigurations.ryosh.activationPackage --no-link
+
   # 軽量チェック（shellcheck）
   lint:
     needs: changes
