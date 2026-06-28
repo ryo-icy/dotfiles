@@ -1,4 +1,4 @@
-{ lib, ... }: {
+{ lib, isWSL ? true, ... }: {
   programs.zsh = {
     enable = true;
     autosuggestion.enable = true;
@@ -26,12 +26,11 @@
       ccu  = "ccusage";
       ccum = "ccusage monthly";
       ccus = "ccusage session";
-
+    } // (if isWSL
       # WSL2: クリップボードへのコピー（文字コードを CP932 に変換してから clip.exe へ渡す）
-      clip = "iconv -t cp932 | clip.exe";
-
-
-    };
+      then { clip = "iconv -t cp932 | clip.exe"; }
+      # Kubuntu: Wayland クリップボードへのコピー
+      else { clip = "wl-copy"; });
 
     initContent = lib.mkMerge [
       ''

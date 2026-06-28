@@ -39,5 +39,11 @@ fi
 # デーモンが起動していない場合は起動を試みる
 if ! docker info &>/dev/null 2>&1; then
   echo "  docker デーモンを起動します..."
-  sudo service docker start || echo "  WARNING: docker デーモンの起動に失敗しました"
+  if pidof systemd &>/dev/null; then
+    # systemd 環境（Kubuntu など）: 起動 + ブート時自動起動を有効化
+    sudo systemctl enable --now docker || echo "  WARNING: docker デーモンの起動に失敗しました"
+  else
+    # WSL2 など systemd 非使用環境
+    sudo service docker start || echo "  WARNING: docker デーモンの起動に失敗しました"
+  fi
 fi

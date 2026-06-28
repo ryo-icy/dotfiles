@@ -46,6 +46,20 @@
         extraSpecialArgs = {
           inherit inputs;
           llm-agents = inputs.llm-agents.packages.${system};
+          isWSL = true;
+        };
+        modules = [
+          ./home/default.nix
+          agent-skills-nix.homeManagerModules.default
+        ];
+      };
+
+      homeConfigurations."ryosh-kubuntu" = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        extraSpecialArgs = {
+          inherit inputs;
+          llm-agents = inputs.llm-agents.packages.${system};
+          isWSL = false;
         };
         modules = [
           ./home/default.nix
@@ -149,8 +163,17 @@
           type = "app";
           program = toString (pkgs.writeShellScript "home-manager-switch" ''
             set -e
-            echo "Building and switching to Home Manager configuration..."
+            echo "Building and switching to Home Manager configuration (WSL2)..."
             nix run nixpkgs#home-manager -- switch --flake .#ryosh
+            echo "Done!"
+          '');
+        };
+        switch-kubuntu = {
+          type = "app";
+          program = toString (pkgs.writeShellScript "home-manager-switch-kubuntu" ''
+            set -e
+            echo "Building and switching to Home Manager configuration (Kubuntu)..."
+            nix run nixpkgs#home-manager -- switch --flake .#ryosh-kubuntu
             echo "Done!"
           '');
         };

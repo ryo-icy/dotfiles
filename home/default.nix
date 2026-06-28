@@ -1,4 +1,4 @@
-{ ... }: {
+{ isWSL ? true, ... }: {
   imports = [
     ./packages.nix
     ./llm-agents.nix
@@ -6,7 +6,7 @@
     ./git.nix
     ./starship.nix
     ./ssh.nix
-    ./wsl.nix
+    (if isWSL then ./wsl.nix else ./kubuntu.nix)
     ./claude.nix
     ./antigravity.nix
     ./agent-skills.nix
