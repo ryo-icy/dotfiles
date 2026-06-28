@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Claude Code 通知スクリプト（WSL2: Windows トースト / Kubuntu: notify-send）
+# Claude Code 通知スクリプト（WSL2: Windows トースト / Kubuntu: Ghostty の OSC 9 に委譲）
 
 if [[ $# -ge 1 ]]; then
   MESSAGE="$1"
@@ -30,7 +30,4 @@ if grep -qi microsoft /proc/version 2>/dev/null; then
 \$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Claude Code');
 \$notifier.Show(\$toast)
 "
-else
-  # Kubuntu: libnotify 通知
-  notify-send --app-name="Claude Code" --urgency=normal "$TITLE" "$MESSAGE"
 fi
