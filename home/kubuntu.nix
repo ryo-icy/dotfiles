@@ -1,4 +1,45 @@
-{ pkgs, lib, ... }: {
+{ pkgs, lib, ... }:
+let
+  # GhosttyのFreedesktop通知をD-Busで監視し、音を鳴らすスクリプト。
+  # GhosttyはGTKアプリ（g_application_send_notification）でKNotificationを使わないため
+  # .notifyrcでは音が鳴らせず、dbus-monitorで直接捕捉する方式を採用する。
+  ghosttyNotifySound = pkgs.writeScript "ghostty-notify-sound" ''
+    #!/usr/bin/env python3
+    import subprocess
+
+    SOUND = "/usr/share/sounds/Oxygen-Sys-App-Message.ogg"
+    PLAYER = "/usr/bin/pw-play"
+
+    proc = subprocess.Popen(
+        [
+            "/usr/bin/dbus-monitor", "--session",
+            "type=method_call,interface='org.freedesktop.Notifications',member='Notify'",
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        bufsize=1,
+    )
+
+    expect_app_name = False
+
+    for line in proc.stdout:
+        line = line.rstrip()
+        if not line:
+            continue
+        if "member=Notify" in line:
+            expect_app_name = True
+        elif expect_app_name:
+            if 'string "ghostty"' in line:
+                subprocess.Popen(
+                    [PLAYER, SOUND],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+            expect_app_name = False
+  '';
+in
+{
   # 1Password for Linux の SSH agent ソケットを使う。
   # ~/.1password/agent.sock は 1Password デスクトップアプリが自動で作成する。
   home.sessionVariables.SSH_AUTH_SOCK = "$HOME/.1password/agent.sock";
@@ -9,8 +50,6 @@
     hackgen-nf-font
   ];
 
-  # Ghostty 本体はシステム側で管理し、設定ファイルだけ home-manager で管理する。
-  # Nix ビルドの Ghostty は非 NixOS 環境で OpenGL コンテキスト取得に失敗するため。
   # Ghostty 本体はシステム側で管理し、設定ファイルだけ home-manager で管理する。
   # Nix ビルドの Ghostty は非 NixOS 環境で OpenGL コンテキスト取得に失敗するため。
   programs.ghostty = {
@@ -193,6 +232,25 @@ FCITX5PROFILE
     $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file kdeglobals --group General --key TerminalApplication ghostty
     $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file kdeglobals --group General --key TerminalService com.mitchellh.ghostty.desktop
   '';
+
+  # Ghosttyのデスクトップ通知が来たら音を鳴らすサービス。
+  # graphical-session.target の起動後に開始し、プロセスが落ちたら自動再起動する。
+  systemd.user.services.ghostty-notify-sound = {
+    Unit = {
+      Description = "Play sound on Ghostty desktop notifications";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${ghosttyNotifySound}";
+      Restart = "always";
+      RestartSec = "3s";
+    };
+    Install = {
+      WantedBy = [ "graphical-session.target" ];
+    };
+  };
 
   # Snap でインストールしたアプリ（Firefox 等）のデスクトップファイルを KDE セッションから参照できるようにする。
   # /etc/profile.d/apps-bin-path.sh が担う処理だが、KDE Plasma グラフィカルセッションでは
