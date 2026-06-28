@@ -1,10 +1,9 @@
-{ pkgs, ... }: {
+{ pkgs, lib, isWSL ? true, ... }: {
   home.packages = with pkgs; [
     # シェル・ファイル操作
     eza
     bat
     fzf
-    wsl-open
     # yazi は shell integration の都合で home/yazi.nix 側で管理する。
     zoxide
     tree
@@ -16,8 +15,6 @@
     (import ./pkgs/rtk.nix { inherit pkgs; })
 
     # 認証・セキュリティ
-    # socat は WSL2 で 1Password SSH Agent をブリッジするために使う。
-    socat
     _1password-cli
     cachix
 
@@ -55,5 +52,9 @@
     nettools
     dnsutils
     traceroute
-  ];
+  ]
+  # WSL2: Windows ファイル/URL を既定アプリで開く、1Password SSH ブリッジ用
+  ++ lib.optionals isWSL [ wsl-open socat ]
+  # Kubuntu: Wayland クリップボード操作
+  ++ lib.optionals (!isWSL) [ wl-clipboard ];
 }

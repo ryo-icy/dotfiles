@@ -17,7 +17,7 @@ fi
 
 # dotfiles リポジトリのルートを特定する
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-HM_CONFIG="ryosh"
+HM_CONFIG="${HM_CONFIG:-ryosh}"
 
 # home-manager は自分が所有していないファイルを上書きしないため、事前に削除する
 # （バックアップは 01-backup.sh で済んでいる前提）

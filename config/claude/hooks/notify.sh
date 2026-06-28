@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Claude Code Windows トースト通知スクリプト
+# Claude Code 通知スクリプト（WSL2: Windows トースト / Kubuntu: notify-send）
 
 if [[ $# -ge 1 ]]; then
   MESSAGE="$1"
@@ -10,11 +10,11 @@ fi
 
 TITLE="Claude Code"
 
-# PowerShell 側でシングルクォートが壊れないようにエスケープ（' -> ''）
-SAFE_MESSAGE="${MESSAGE//\'/\'\'}"
-SAFE_TITLE="${TITLE//\'/\'\'}"
-
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "
+if grep -qi microsoft /proc/version 2>/dev/null; then
+  # WSL2: Windows トースト通知
+  SAFE_MESSAGE="${MESSAGE//\'/\'\'}"
+  SAFE_TITLE="${TITLE//\'/\'\'}"
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null;
 \$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02);
 \$xml = [xml]\$template.GetXml();
@@ -30,3 +30,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "
 \$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Claude Code');
 \$notifier.Show(\$toast)
 "
+else
+  # Kubuntu: libnotify 通知
+  notify-send --app-name="Claude Code" --urgency=normal "$TITLE" "$MESSAGE"
+fi

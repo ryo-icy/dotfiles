@@ -9,7 +9,7 @@
 
 ## このリポジトリで優先すること
 
-このリポジトリは、WSL2 Ubuntu 環境を Nix と home-manager で宣言的に管理するための正本である。初回構築は `scripts/bootstrap.sh`、日常更新は `home-manager switch` または `nix run .#switch` を前提とする。
+このリポジトリは、WSL2/Ubuntu および Kubuntu 環境を Nix と home-manager で宣言的に管理するための正本である。初回構築は WSL2 が `scripts/bootstrap.sh`、Kubuntu が `scripts/bootstrap-kubuntu.sh`。日常更新は `nix run .#switch`（WSL2）/ `nix run .#switch-kubuntu`（Kubuntu）を前提とする。
 
 ルートのドキュメントは高レベルの方針だけを書く。あるディレクトリ固有の運用や判断基準は、そのディレクトリの `README.md` または `AGENTS.md` に置き、上位ドキュメントへ詳細を積み増さない。
 
@@ -58,10 +58,11 @@
 - グローバル `core.hooksPath` は設定しない。
 - このリポジトリの定型操作は `just setup` と `just lint` を入口にする。
 
-### 1Password / WSL2
+### 1Password / SSH Agent
 
-- Linux ネイティブの `ssh` や `op` から 1Password SSH Agent を使うため、Windows 側 named pipe を Linux 側ソケットへブリッジする。
 - `core.sshCommand` を上書きして回避しない。Linux 側の `~/.ssh/config` と `SSH_AUTH_SOCK` を前提に保つ。
+- WSL2: Windows 側 named pipe を socat でブリッジし、`SSH_AUTH_SOCK=/tmp/ssh-agent-1p.sock` に設定する（`home/wsl.nix`）。
+- Kubuntu: 1Password for Linux デスクトップアプリが `~/.1password/agent.sock` を提供する（`home/kubuntu.nix`）。
 
 ### Nix 管理のカスタムパッケージ
 
@@ -78,7 +79,7 @@
 
 ## 変更時の実務メモ
 
-設定反映:
+設定反映（WSL2）:
 
 ```bash
 home-manager switch --flake ".#ryosh"
@@ -90,13 +91,25 @@ home-manager switch --flake ".#ryosh"
 nix run .#switch
 ```
 
+設定反映（Kubuntu）:
+
+```bash
+home-manager switch --flake ".#ryosh-kubuntu"
+```
+
+または:
+
+```bash
+nix run .#switch-kubuntu
+```
+
 依存更新を伴う場合:
 
 ```bash
 nix flake update
 git add flake.lock
 git commit -m "chore: nix flake update"
-home-manager switch --flake ".#ryosh"
+home-manager switch --flake ".#<設定名>"
 ```
 
 シークレットの再配置:
@@ -106,3 +119,12 @@ op signin
 bash scripts/export-ssh-keys.sh
 bash scripts/export-kubeconfig.sh
 ```
+
+新規端末への Nix trusted-users / cachix 初期設定（bootstrap を実行しない既存環境向け）:
+
+```bash
+printf 'trusted-users = root ryosh\nextra-substituters = https://ryo-icy-dotfiles.cachix.org\nextra-trusted-public-keys = ryo-icy-dotfiles.cachix.org-1:b0DWdQSrNhcUcy0WcXH3JuAK4KqA3wGayM9T4YRdpBk=\n' \
+  | sudo tee -a /etc/nix/nix.custom.conf && sudo systemctl restart nix-daemon
+```
+
+`/etc/nix/nix.conf` は Determinate Systems が管理・上書きするため変更しない。設定は `nix.custom.conf` に書き込む（再起動後も保持される）。新規端末では `scripts/units/03-nix.sh`（bootstrap 経由）が自動で行う。
