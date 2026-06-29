@@ -195,6 +195,12 @@ FCITX5PROFILE
     $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file krunnerrc --group General --key FreeFloating true
   '';
 
+  # Alt+Tab のタスクスイッチャーを画面中央にサムネイルグリッドで表示する。
+  # kwinrc は KWin 自身が書き込むため symlink 管理できない。kwriteconfig5 で特定キーだけ設定する。
+  home.activation.kwinTabBoxLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file kwinrc --group TabBox --key LayoutName org.kde.thumbnails
+  '';
+
   # タッチパッドのナチュラルスクロールを有効化する。
   # touchpadxlibinputrc に NaturalScroll=true を書くが、kcminit_startup がデバイス準備より早く走るため
   # autostart で kcminit kcm_touchpad を再実行して確実に適用する。
