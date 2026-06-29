@@ -31,6 +31,7 @@ units=(
   "02-docker.sh"
   "03-nix.sh"
   "05-home-manager.sh"
+  "07-input-group.sh"
   "08-ssh-keys.sh"
   "09-chsh.sh"
   "10-kubeconfig.sh"

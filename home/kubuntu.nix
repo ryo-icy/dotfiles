@@ -48,6 +48,8 @@ in
   home.packages = with pkgs; [
     hackgen-font
     hackgen-nf-font
+    libinput-gestures
+    xdotool
   ];
 
   # Ghostty 本体はシステム側で管理し、設定ファイルだけ home-manager で管理する。
@@ -72,6 +74,32 @@ in
         # Ctrl+Enter で改行文字を送信（Claude 等での改行挿入）
         "ctrl+enter=text:\\n"
       ];
+    };
+  };
+
+  # 3本指水平スワイプでブラウザ前後移動。
+  # libinput-gestures は /dev/input を直接読むため input グループへの加入が必要。
+  # 初回のみ: sudo usermod -a -G input ryosh && ログアウト再ログイン
+  xdg.configFile."libinput-gestures.conf".text = ''
+    gesture swipe right 3 xdotool key alt+Left
+    gesture swipe left 3 xdotool key alt+Right
+
+  '';
+
+  systemd.user.services.libinput-gestures = {
+    Unit = {
+      Description = "Touchpad gesture recognizer";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${pkgs.libinput-gestures}/bin/libinput-gestures";
+      Restart = "on-failure";
+      RestartSec = "3s";
+    };
+    Install = {
+      WantedBy = [ "graphical-session.target" ];
     };
   };
 
