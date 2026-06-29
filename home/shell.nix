@@ -26,11 +26,8 @@
       ccu  = "ccusage";
       ccum = "ccusage monthly";
       ccus = "ccusage session";
-    } // (if isWSL
-      # WSL2: クリップボードへのコピー（文字コードを CP932 に変換してから clip.exe へ渡す）
-      then { clip = "iconv -t cp932 | clip.exe"; }
-      # Kubuntu: Wayland クリップボードへのコピー
-      else { clip = "wl-copy"; });
+    # WSL2: クリップボードへのコピー（文字コードを CP932 に変換してから clip.exe へ渡す）
+    } // lib.optionalAttrs isWSL { clip = "iconv -t cp932 | clip.exe"; };
 
     initContent = lib.mkMerge [
       ''
@@ -60,6 +57,16 @@
           fi
         }
       ''
+      (lib.optionalString (!isWSL) ''
+        # X11/Wayland セッション種別を自動検出してクリップボードへコピー
+        function clip() {
+          if [ "''${XDG_SESSION_TYPE}" = "wayland" ] || [ -n "''${WAYLAND_DISPLAY}" ]; then
+            wl-copy "$@"
+          else
+            xclip -selection clipboard "$@"
+          fi
+        }
+      '')
       (lib.mkAfter ''
         command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
       '')

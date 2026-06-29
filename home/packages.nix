@@ -55,6 +55,6 @@
   ]
   # WSL2: Windows ファイル/URL を既定アプリで開く、1Password SSH ブリッジ用
   ++ lib.optionals isWSL [ wsl-open socat ]
-  # Kubuntu: Wayland クリップボード操作
-  ++ lib.optionals (!isWSL) [ wl-clipboard ];
+  # Kubuntu: X11/Wayland 両対応クリップボード操作
+  ++ lib.optionals (!isWSL) [ wl-clipboard xclip ];
 }
