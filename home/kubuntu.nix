@@ -65,6 +65,7 @@ in
       window-width = 144;
       window-height = 40;
       window-save-state = "never";
+      background-opacity = 0.9;
       gtk-single-instance = false;
       keybind = [
         # 選択中ならコピー、なければ通常の Ctrl+C（割り込み）をアプリへ渡す
