@@ -291,6 +291,11 @@ FCITX5PROFILE
   # XDG ユーザーディレクトリを英語名に固定する。
   # 日本語ロケールのままだと xdg-user-dirs-update がドキュメント等を日本語名で作成するため明示指定する。
   xdg.configFile."user-dirs.dirs".force = true;
+  # xdg-user-dirs-update がログイン時に日本語ロケールで dirs を上書きするのを防ぐ。
+  xdg.configFile."user-dirs.locale" = {
+    text = "en_US\n";
+    force = true;
+  };
   xdg.userDirs = {
     enable = true;
     createDirectories = true;
