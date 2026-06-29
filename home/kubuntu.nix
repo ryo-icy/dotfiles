@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, ... }:
 let
   # GhosttyのFreedesktop通知をD-Busで監視し、音を鳴らすスクリプト。
   # GhosttyはGTKアプリ（g_application_send_notification）でKNotificationを使わないため
@@ -286,6 +286,22 @@ FCITX5PROFILE
     Install = {
       WantedBy = [ "graphical-session.target" ];
     };
+  };
+
+  # XDG ユーザーディレクトリを英語名に固定する。
+  # 日本語ロケールのままだと xdg-user-dirs-update がドキュメント等を日本語名で作成するため明示指定する。
+  xdg.configFile."user-dirs.dirs".force = true;
+  xdg.userDirs = {
+    enable = true;
+    createDirectories = true;
+    desktop = "${config.home.homeDirectory}/Desktop";
+    documents = "${config.home.homeDirectory}/Documents";
+    download = "${config.home.homeDirectory}/Downloads";
+    music = "${config.home.homeDirectory}/Music";
+    pictures = "${config.home.homeDirectory}/Pictures";
+    publicShare = "${config.home.homeDirectory}/Public";
+    templates = "${config.home.homeDirectory}/Templates";
+    videos = "${config.home.homeDirectory}/Videos";
   };
 
   # Snap でインストールしたアプリ（Firefox 等）のデスクトップファイルを KDE セッションから参照できるようにする。
