@@ -318,4 +318,15 @@ FCITX5PROFILE
     '';
     executable = true;
   };
+
+  # Firefox の GPU アクセラレーションを有効化する。
+  # Intel Iris Xe + X11 環境では MOZ_X11_EGL=1 で EGL レンダリングに切り替えると描画が軽くなる。
+  # LIBVA_DRIVER_NAME=iHD で intel-media-va-driver-non-free を明示指定し VA-API を確実に使わせる。
+  home.file.".config/plasma-workspace/env/firefox-gpu.sh" = {
+    text = ''
+      export MOZ_X11_EGL=1
+      export LIBVA_DRIVER_NAME=iHD
+    '';
+    executable = true;
+  };
 }
