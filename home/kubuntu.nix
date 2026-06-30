@@ -194,7 +194,46 @@ in
     AutoSavePeriod=30
   '';
 
-  # fcitx5 の入力メソッドグループ設定（mozc + 日本語キーボード）。
+  # karukan ユーザーローカルインストール（~/.local）用に FCITX_ADDON_DIRS を設定する。
+  # fcitx5 はグラフィカルセッション開始時に起動されるため、シェルプロファイルではなく
+  # environment.d に書く。システムパスを欠くと wayland・classicui 等の標準アドオンが失われる。
+  home.activation.fcitx5KarukanAddonDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    FCITX5_SYS_DIR=""
+    if command -v pkg-config >/dev/null 2>&1 && pkg-config --exists Fcitx5Core 2>/dev/null; then
+      FCITX5_SYS_DIR=$(pkg-config --variable=libdir Fcitx5Core)/fcitx5
+    elif [ -d /usr/lib/x86_64-linux-gnu/fcitx5 ]; then
+      FCITX5_SYS_DIR=/usr/lib/x86_64-linux-gnu/fcitx5
+    fi
+    if [ -n "$FCITX5_SYS_DIR" ]; then
+      $DRY_RUN_CMD mkdir -p "$HOME/.config/environment.d"
+      if [[ -z "$DRY_RUN_CMD" ]]; then
+        printf 'FCITX_ADDON_DIRS=%s/.local/lib/fcitx5:%s\n' "$HOME" "$FCITX5_SYS_DIR" \
+          > "$HOME/.config/environment.d/fcitx5-karukan.conf"
+      fi
+    fi
+  '';
+
+  # karukan のシステム辞書を初回のみダウンロードする。
+  # dict.bin がない場合のみ取得するため、2 回目以降の switch では何もしない。
+  home.activation.karukanDict = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    DICT_PATH="$HOME/.local/share/karukan-im/dict.bin"
+    if [[ -z "$DRY_RUN_CMD" ]] && [ ! -f "$DICT_PATH" ]; then
+      $DRY_RUN_CMD mkdir -p "$HOME/.local/share/karukan-im"
+      echo "karukan: システム辞書をダウンロードしています..."
+      TMP_DIR=$(mktemp -d)
+      if wget -q -O "$TMP_DIR/dict.tgz" \
+          "https://github.com/togatoga/karukan/releases/download/v0.1.0/dict.tgz"; then
+        tar -xzf "$TMP_DIR/dict.tgz" -C "$TMP_DIR"
+        cp "$TMP_DIR/dict.bin" "$DICT_PATH"
+        echo "karukan: システム辞書のインストールが完了しました。"
+      else
+        echo "karukan: システム辞書のダウンロードに失敗しました。手動でインストールしてください。" >&2
+      fi
+      rm -rf "$TMP_DIR"
+    fi
+  '';
+
+  # fcitx5 の入力メソッドグループ設定（karukan + 日本語キーボード）。
   # profile は fcitx5 が起動時に書き込むため symlink 管理できない。activation で上書きする。
   home.activation.fcitx5Profile = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD mkdir -p "$HOME/.config/fcitx5"
@@ -203,14 +242,14 @@ in
 [Groups/0]
 Name=デフォルト
 Default Layout=jp
-DefaultIM=mozc
+DefaultIM=karukan
 
 [Groups/0/Items/0]
 Name=keyboard-jp
 Layout=
 
 [Groups/0/Items/1]
-Name=mozc
+Name=karukan
 Layout=
 
 [GroupOrder]
