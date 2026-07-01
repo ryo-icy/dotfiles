@@ -78,6 +78,9 @@ in
         "ctrl+v=paste_from_clipboard"
         # Ctrl+Enter で改行文字を送信（Claude 等での改行挿入）
         "ctrl+enter=text:\\n"
+        # ペイン分割: H=横並び (horizontal), V=縦並び (vertical)
+        "ctrl+shift+h=new_split:right"
+        "ctrl+shift+v=new_split:down"
       ];
     };
   };
