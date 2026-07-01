@@ -64,6 +64,13 @@
 - WSL2: Windows 側 named pipe を socat でブリッジし、`SSH_AUTH_SOCK=/tmp/ssh-agent-1p.sock` に設定する（`home/wsl.nix`）。
 - Kubuntu: 1Password for Linux デスクトップアプリが `~/.1password/agent.sock` を提供する（`home/kubuntu.nix`）。
 
+### Kubuntu / Wayland
+
+- Kubuntu は KDE Plasma の Wayland セッション（`plasma-workspace-wayland` パッケージ）を使用する。`scripts/units/12-wayland.sh` が導入し、bootstrap 後に SDDM で「Plasma (Wayland)」を選択して初回ログインする必要がある。
+- タッチパッドジェスチャーは `libinput-gestures` + `qdbus` で実装する。KDE Wayland は `zwp_virtual_keyboard_manager_v1` を実装していないため `xdotool`・`wtype` によるキー注入は動作しない。KDE グローバルショートカットは `qdbus org.kde.kglobalaccel` 経由で呼び出す。
+- KWin の `SwipeMinFingerCount=4`（`kwinrc [Gestures]`）で 3本指スワイプを KWin ジェスチャー認識から除外し、libinput-gestures に完全委任する。これを設定しないと 3本指スワイプがスクロールとして漏れる。
+- タッチパッド設定（NaturalScroll・tapToClick・clickMethod）は `touchpadxlibinputrc` に書き `kcminit kcm_touchpad` autostart で適用する。`qdbus org.kde.KWin /KWin reconfigure` だけでは touchpadxlibinputrc が再読み込みされない。
+
 ### Nix 管理のカスタムパッケージ
 
 - nixpkgs 未収録ツールは `home/pkgs/` で管理する。

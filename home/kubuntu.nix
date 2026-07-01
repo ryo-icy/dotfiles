@@ -48,8 +48,8 @@ in
   home.packages = with pkgs; [
     hackgen-font
     hackgen-nf-font
+    # ジェスチャー: libinput-gesturesで/dev/inputを読み、qdbusでKDEショートカットを呼び出す
     libinput-gestures
-    xdotool
   ];
 
   # Ghostty 本体はシステム側で管理し、設定ファイルだけ home-manager で管理する。
@@ -61,13 +61,16 @@ in
     systemd.enable = false;
     settings = {
       font-family = "HackGen Console NF";
-      font-size = 13;
+      font-size = 15;
       window-width = 144;
       window-height = 40;
       window-save-state = "never";
       background-opacity = 0.9;
       unfocused-split-opacity = 0.7;
       gtk-single-instance = false;
+      # Wayland+KDE では KWin が SSD を提供するため auto だと CSD のタブバーが消える。
+      # client を指定して Ghostty 自身の CSD タイトルバー（タブバー含む）を強制表示する。
+      window-decoration = "client";
       keybind = [
         # 選択中ならコピー、なければ通常の Ctrl+C（割り込み）をアプリへ渡す
         "performable:ctrl+c=copy_to_clipboard"
@@ -79,26 +82,26 @@ in
     };
   };
 
-  # libinput-gestures は /dev/input を直接読むため input グループへの加入が必要。
-  # 初回のみ: sudo usermod -a -G input ryosh && ログアウト再ログイン
+  # Plasma 5.27 Wayland では 3本指上スワイプが KWin に未割り当てのため libinput-gestures で捕捉する。
+  # wtype/xdotool は KDE Wayland で virtual keyboard protocol 未対応のため動かない。
+  # qdbus 経由で kglobalaccel のショートカットを直接呼び出す方式を使う。
+  # KWin の SwipeMinFingerCount=4 により 3本指はKWinが処理せず libinput-gestures に完全委任する。
+  # これにより 3本指スワイプがスクロールとして誤認識されるのを防ぐ。
+  # /dev/input を直接読むため input グループへの加入が必要（07-input-group.sh 参照）。
   xdg.configFile."libinput-gestures.conf".text = ''
-    # ジェスチャ開始から終了までのタイムアウト（0=無制限、デフォルト1.5s）
     timeout 0
-    # スワイプ発火に必要な最低移動量（0=制限なし、デフォルト0）
     swipe_threshold 0
 
-    # 3本指水平スワイプ: 仮想デスクトップ切り替え (KDE: Meta+Ctrl+Left/Right)
-    gesture swipe right 3 xdotool key super+ctrl+Left
-    gesture swipe left 3 xdotool key super+ctrl+Right
-
-    # 3本指上スワイプ: Overview (KDE: Meta+W)
-    gesture swipe up 3 xdotool key super+w
-
+    # 3本指上スワイプ: Overview
+    gesture swipe up 3 qdbus org.kde.kglobalaccel /component/kwin org.kde.kglobalaccel.Component.invokeShortcut Overview
+    # 3本指左右スワイプ: 仮想デスクトップ切替（KWinから引き継ぎ）
+    gesture swipe right 3 qdbus org.kde.kglobalaccel /component/kwin org.kde.kglobalaccel.Component.invokeShortcut "Switch One Desktop to the Left"
+    gesture swipe left 3 qdbus org.kde.kglobalaccel /component/kwin org.kde.kglobalaccel.Component.invokeShortcut "Switch One Desktop to the Right"
   '';
 
   systemd.user.services.libinput-gestures = {
     Unit = {
-      Description = "Touchpad gesture recognizer";
+      Description = "Touchpad gesture recognizer (Wayland)";
       After = [ "graphical-session.target" ];
       PartOf = [ "graphical-session.target" ];
     };
@@ -276,35 +279,27 @@ FCITX5PROFILE
   # kwinrc は KWin 自身が書き込むため symlink 管理できない。kwriteconfig5 で特定キーだけ設定する。
   home.activation.kwinTabBoxLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file kwinrc --group TabBox --key LayoutName org.kde.thumbnails
+    # 3本指スワイプを KWin ジェスチャーから除外し libinput-gestures に完全委任する。
+    # KWin が 3本指を処理しないことで、スワイプがスクロールとして漏れるのを防ぐ。
+    $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file kwinrc --group Gestures --key SwipeMinFingerCount 4
   '';
 
-  # タッチパッドのナチュラルスクロールを有効化する。
-  # touchpadxlibinputrc に NaturalScroll=true を書くが、kcminit_startup がデバイス準備より早く走るため
-  # autostart で kcminit kcm_touchpad を再実行して確実に適用する。
-  home.activation.touchpadNaturalScroll = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  # タッチパッド設定。kcminit_startup がデバイス準備より早く走るため autostart で kcminit kcm_touchpad を再実行して確実に適用する。
+  # - NaturalScroll: 上スワイプで下スクロール（macOS方式）
+  # - tapToClick: タップでクリック有効（2本指タップ = 右クリック、3本指タップ = 中クリック）
+  # - clickMethodClickfinger: 指の本数でボタンを判定（2本指 = 右クリック）
+  home.activation.touchpadSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file touchpadxlibinputrc --group "SYNA32CF:00 06CB:CECD Touchpad" --key NaturalScroll true
+    $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file touchpadxlibinputrc --group "SYNA32CF:00 06CB:CECD Touchpad" --key tapToClick true
+    $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file touchpadxlibinputrc --group "SYNA32CF:00 06CB:CECD Touchpad" --key clickMethodAreas false
+    $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file touchpadxlibinputrc --group "SYNA32CF:00 06CB:CECD Touchpad" --key clickMethodClickfinger true
   '';
-
-  # デバイスが X11 に登録されるまで最大 10 秒リトライする。
-  # Exec= インラインでのシェル構文は systemd がエスケープするため、スクリプトを別ファイルに分離する。
-  home.file.".local/bin/touchpad-init" = {
-    executable = true;
-    text = ''
-      #!/usr/bin/env bash
-      for i in $(seq 10); do
-        /usr/bin/xinput set-prop "SYNA32CF:00 06CB:CECD Touchpad" "libinput Natural Scrolling Enabled" 1 2>/dev/null || { sleep 1; continue; }
-        # Scrolling Pixel Distance: 1スクロール単位あたりの必要移動量（大きいほど遅い、デフォルト15）
-        /usr/bin/xinput set-prop "SYNA32CF:00 06CB:CECD Touchpad" "libinput Scrolling Pixel Distance" 25 2>/dev/null
-        exit 0
-      done
-    '';
-  };
 
   home.file.".config/autostart/touchpad-init.desktop".text = ''
     [Desktop Entry]
     Type=Application
     Name=Touchpad Init
-    Exec=/home/ryosh/.local/bin/touchpad-init
+    Exec=sh -c "sleep 2 && kcminit kcm_touchpad"
     Hidden=false
     NoDisplay=true
     X-KDE-autostart-enabled=true
@@ -370,11 +365,11 @@ FCITX5PROFILE
   };
 
   # Firefox の GPU アクセラレーションを有効化する。
-  # Intel Iris Xe + X11 環境では MOZ_X11_EGL=1 で EGL レンダリングに切り替えると描画が軽くなる。
+  # Wayland セッションでは MOZ_ENABLE_WAYLAND=1 でネイティブ Wayland レンダリングを有効にする。
   # LIBVA_DRIVER_NAME=iHD で intel-media-va-driver-non-free を明示指定し VA-API を確実に使わせる。
   home.file.".config/plasma-workspace/env/firefox-gpu.sh" = {
     text = ''
-      export MOZ_X11_EGL=1
+      export MOZ_ENABLE_WAYLAND=1
       export LIBVA_DRIVER_NAME=iHD
     '';
     executable = true;
