@@ -37,6 +37,8 @@ units=(
   "10-kubeconfig.sh"
   "11-intel-vaapi.sh"
   "12-wayland.sh"
+  "13-karukan.sh"
+  "14-magic-trackpad-udev.sh"
 )
 
 total=${#units[@]}
@@ -59,3 +61,4 @@ echo "  3. Docker 確認:                 docker run hello-world"
 echo "  4. Claude Code 確認:            claude --version"
 echo "  5. Antigravity CLI 確認:        agy --version"
 echo "  6. 鍵エクスポートが失敗した場合: op signin && bash scripts/units/08-ssh-keys.sh"
+echo "  7. karukan 確認 (再ログイン後): fcitx5 -r -d 2>&1 | grep -i karukan"
