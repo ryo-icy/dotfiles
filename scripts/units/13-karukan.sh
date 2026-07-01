@@ -8,7 +8,7 @@ set -euo pipefail
 
 INSTALL_MARKER="$HOME/.local/lib/fcitx5"
 
-if ls "$INSTALL_MARKER"/libkarukan*.so 2>/dev/null | grep -q .; then
+if compgen -G "$INSTALL_MARKER/libkarukan*.so" > /dev/null 2>&1; then
   echo "  Already installed: karukan fcitx5 addon"
   exit 0
 fi
