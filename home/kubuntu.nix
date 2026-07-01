@@ -79,12 +79,20 @@ in
     };
   };
 
-  # 3本指水平スワイプでブラウザ前後移動。
   # libinput-gestures は /dev/input を直接読むため input グループへの加入が必要。
   # 初回のみ: sudo usermod -a -G input ryosh && ログアウト再ログイン
   xdg.configFile."libinput-gestures.conf".text = ''
-    gesture swipe right 3 xdotool key alt+Left
-    gesture swipe left 3 xdotool key alt+Right
+    # ジェスチャ開始から終了までのタイムアウト（0=無制限、デフォルト1.5s）
+    timeout 0
+    # スワイプ発火に必要な最低移動量（0=制限なし、デフォルト0）
+    swipe_threshold 0
+
+    # 3本指水平スワイプ: 仮想デスクトップ切り替え (KDE: Meta+Ctrl+Left/Right)
+    gesture swipe right 3 xdotool key super+ctrl+Left
+    gesture swipe left 3 xdotool key super+ctrl+Right
+
+    # 3本指上スワイプ: Overview (KDE: Meta+W)
+    gesture swipe up 3 xdotool key super+w
 
   '';
 
@@ -279,22 +287,24 @@ FCITX5PROFILE
 
   # デバイスが X11 に登録されるまで最大 10 秒リトライする。
   # Exec= インラインでのシェル構文は systemd がエスケープするため、スクリプトを別ファイルに分離する。
-  home.file.".local/bin/touchpad-natural-scroll" = {
+  home.file.".local/bin/touchpad-init" = {
     executable = true;
     text = ''
       #!/usr/bin/env bash
       for i in $(seq 10); do
-        /usr/bin/xinput set-prop "SYNA32CF:00 06CB:CECD Touchpad" "libinput Natural Scrolling Enabled" 1 2>/dev/null && exit 0
-        sleep 1
+        /usr/bin/xinput set-prop "SYNA32CF:00 06CB:CECD Touchpad" "libinput Natural Scrolling Enabled" 1 2>/dev/null || { sleep 1; continue; }
+        # Scrolling Pixel Distance: 1スクロール単位あたりの必要移動量（大きいほど遅い、デフォルト15）
+        /usr/bin/xinput set-prop "SYNA32CF:00 06CB:CECD Touchpad" "libinput Scrolling Pixel Distance" 25 2>/dev/null
+        exit 0
       done
     '';
   };
 
-  home.file.".config/autostart/touchpad-natural-scroll.desktop".text = ''
+  home.file.".config/autostart/touchpad-init.desktop".text = ''
     [Desktop Entry]
     Type=Application
-    Name=Touchpad Natural Scroll
-    Exec=/home/ryosh/.local/bin/touchpad-natural-scroll
+    Name=Touchpad Init
+    Exec=/home/ryosh/.local/bin/touchpad-init
     Hidden=false
     NoDisplay=true
     X-KDE-autostart-enabled=true
