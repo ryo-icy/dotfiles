@@ -1,5 +1,82 @@
 { pkgs, lib, config, ... }:
 let
+  # libinput-gestures は1インスタンスにつき1デバイスしか監視できず複数起動をロックで禁止する。
+  # Magic Trackpad 用に libinput debug-events を直接パースしてジェスチャーを処理するスクリプト。
+  # libinput.bin は libinput-gestures の依存として Nix ストアにある。
+  magicTrackpadGestureHandler = pkgs.writeScript "magic-trackpad-gesture-handler" ''
+    #!${pkgs.python3}/bin/python3
+    """Apple Magic Trackpad のジェスチャーを KDE Wayland の qdbus コマンドに変換する。"""
+    import subprocess, sys, time, re
+
+    LIBINPUT = "${pkgs.libinput.bin}/bin/libinput"
+    DEVICE_NAME = "Apple Inc. Magic Trackpad USB-C"
+
+    GESTURES = {
+        ("up",    3): ["qdbus", "org.kde.kglobalaccel", "/component/kwin",
+                       "org.kde.kglobalaccel.Component.invokeShortcut", "Overview"],
+        ("right", 3): ["qdbus", "org.kde.kglobalaccel", "/component/kwin",
+                       "org.kde.kglobalaccel.Component.invokeShortcut",
+                       "Switch One Desktop to the Left"],
+        ("left",  3): ["qdbus", "org.kde.kglobalaccel", "/component/kwin",
+                       "org.kde.kglobalaccel.Component.invokeShortcut",
+                       "Switch One Desktop to the Right"],
+    }
+
+    BEGIN_RE  = re.compile(r'GESTURE_SWIPE_BEGIN\s+\S+\s+(\d+)')
+    UPDATE_RE = re.compile(r'GESTURE_SWIPE_UPDATE\s+\S+\s+\d+\s+([-\d.]+)/\s*([-\d.]+)')
+    # libinput 1.19+ の新フォーマット: キャンセル時のみ行末に "cancelled" が付く。
+    # 旧フォーマット (cancelled=0/1) は廃止されたため、文字列の有無で判定する。
+
+    def find_device():
+        try:
+            out = subprocess.run([LIBINPUT, "list-devices"],
+                                 capture_output=True, text=True, timeout=5).stdout
+            found = False
+            for line in out.splitlines():
+                if DEVICE_NAME in line:
+                    found = True
+                elif found and "Kernel:" in line:
+                    return line.split()[-1]
+                elif found and not line.strip():
+                    found = False
+        except Exception:
+            pass
+        return None
+
+    def run_gestures(device):
+        proc = subprocess.Popen(
+            [LIBINPUT, "debug-events", "--device", device],
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            text=True, bufsize=1)
+        fingers = dx = dy = 0
+        try:
+            for line in proc.stdout:
+                m = BEGIN_RE.search(line)
+                if m:
+                    fingers, dx, dy = int(m.group(1)), 0.0, 0.0
+                    continue
+                m = UPDATE_RE.search(line)
+                if m:
+                    dx += float(m.group(1))
+                    dy += float(m.group(2))
+                    continue
+                if "GESTURE_SWIPE_END" in line and "cancelled" not in line and fingers >= 3:
+                    direction = ("up" if dy < 0 else "down") if abs(dy) >= abs(dx) \
+                                else ("right" if dx > 0 else "left")
+                    cmd = GESTURES.get((direction, fingers))
+                    if cmd:
+                        subprocess.Popen(cmd, stdout=subprocess.DEVNULL,
+                                         stderr=subprocess.DEVNULL)
+        finally:
+            proc.terminate()
+
+    while True:
+        dev = find_device()
+        if dev:
+            run_gestures(dev)
+        time.sleep(3)
+  '';
+
   # GhosttyのFreedesktop通知をD-Busで監視し、音を鳴らすスクリプト。
   # GhosttyはGTKアプリ（g_application_send_notification）でKNotificationを使わないため
   # .notifyrcでは音が鳴らせず、dbus-monitorで直接捕捉する方式を採用する。
@@ -112,6 +189,28 @@ in
       Type = "simple";
       ExecStart = "${pkgs.libinput-gestures}/bin/libinput-gestures";
       Restart = "on-failure";
+      RestartSec = "3s";
+    };
+    Install = {
+      WantedBy = [ "graphical-session.target" ];
+    };
+  };
+
+
+  # Apple Magic Trackpad 専用のジェスチャーハンドラー。
+  # libinput-gestures は複数インスタンス起動をロックで禁止するため、
+  # libinput debug-events を直接パースするカスタムスクリプトを使う。
+  # デバイス未接続時は 3 秒ごとに再試行し、接続後自動で動き始める。
+  systemd.user.services.magic-trackpad-gestures = {
+    Unit = {
+      Description = "Gesture handler for Apple Magic Trackpad (Wayland)";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${magicTrackpadGestureHandler}";
+      Restart = "always";
       RestartSec = "3s";
     };
     Install = {
@@ -291,11 +390,19 @@ FCITX5PROFILE
   # - NaturalScroll: 上スワイプで下スクロール（macOS方式）
   # - tapToClick: タップでクリック有効（2本指タップ = 右クリック、3本指タップ = 中クリック）
   # - clickMethodClickfinger: 指の本数でボタンを判定（2本指 = 右クリック）
+  # Apple Magic Trackpad USB-C も同じ設定を適用する。
   home.activation.touchpadSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file touchpadxlibinputrc --group "SYNA32CF:00 06CB:CECD Touchpad" --key NaturalScroll true
-    $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file touchpadxlibinputrc --group "SYNA32CF:00 06CB:CECD Touchpad" --key tapToClick true
-    $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file touchpadxlibinputrc --group "SYNA32CF:00 06CB:CECD Touchpad" --key clickMethodAreas false
-    $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file touchpadxlibinputrc --group "SYNA32CF:00 06CB:CECD Touchpad" --key clickMethodClickfinger true
+    for DEVICE in "SYNA32CF:00 06CB:CECD Touchpad" "Apple Inc. Magic Trackpad USB-C"; do
+      $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file touchpadxlibinputrc --group "$DEVICE" --key NaturalScroll true
+      $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file touchpadxlibinputrc --group "$DEVICE" --key tapToClick true
+      $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file touchpadxlibinputrc --group "$DEVICE" --key clickMethodAreas false
+      $DRY_RUN_CMD /usr/bin/kwriteconfig5 --file touchpadxlibinputrc --group "$DEVICE" --key clickMethodClickfinger true
+    done
+    # kwriteconfig5 はファイルを更新するだけで KWin への反映は別途必要。
+    # switch 実行中のセッションにも即座に設定を適用する。
+    if [[ -z "$DRY_RUN_CMD" ]] && command -v kcminit >/dev/null 2>&1; then
+      kcminit kcm_touchpad 2>/dev/null || true
+    fi
   '';
 
   home.file.".config/autostart/touchpad-init.desktop".text = ''
@@ -363,6 +470,32 @@ FCITX5PROFILE
   home.file.".config/plasma-workspace/env/snap-xdg.sh" = {
     text = ''
       export XDG_DATA_DIRS="$XDG_DATA_DIRS:/var/lib/snapd/desktop"
+    '';
+    executable = true;
+  };
+
+  # fcitx5 をグラフィカルセッション開始時に自動起動する。
+  # KDE Plasma Wayland では autostart .desktop がないと fcitx5 が起動せず DBus 接続に失敗する。
+  home.file.".config/autostart/fcitx5.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Fcitx 5
+    Exec=/usr/bin/fcitx5
+    Hidden=false
+    NoDisplay=true
+    X-KDE-autostart-enabled=true
+  '';
+
+  # グラフィカルセッション全体の IM 環境変数を設定する。
+  # plasma-workspace/env はシェルより先に評価されるため GTK/Qt/SDL アプリに確実に伝わる。
+  # Wayland セッションでも GTK アプリは GTK_IM_MODULE を参照するため明示指定が必要。
+  home.file.".config/plasma-workspace/env/fcitx5.sh" = {
+    text = ''
+      export XMODIFIERS="@im=fcitx"
+      export GTK_IM_MODULE=fcitx
+      export QT_IM_MODULE=fcitx
+      export SDL_IM_MODULE=fcitx
+      export INPUT_METHOD=fcitx
     '';
     executable = true;
   };
