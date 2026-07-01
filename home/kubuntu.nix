@@ -61,7 +61,8 @@ let
                     dy += float(m.group(2))
                     continue
                 if "GESTURE_SWIPE_END" in line and "cancelled" not in line and fingers >= 3:
-                    direction = ("up" if dy < 0 else "down") if abs(dy) >= abs(dx) \
+                    # 左右トリガーは水平変位が垂直の2倍以上のときのみ。誤発火を防ぐ。
+                    direction = ("up" if dy < 0 else "down") if abs(dy) * 2 >= abs(dx) \
                                 else ("right" if dx > 0 else "left")
                     cmd = GESTURES.get((direction, fingers))
                     if cmd:
@@ -170,7 +171,7 @@ in
   # /dev/input を直接読むため input グループへの加入が必要（07-input-group.sh 参照）。
   xdg.configFile."libinput-gestures.conf".text = ''
     timeout 0
-    swipe_threshold 0
+    swipe_threshold 30
 
     # 3本指上スワイプ: Overview
     gesture swipe up 3 qdbus org.kde.kglobalaccel /component/kwin org.kde.kglobalaccel.Component.invokeShortcut Overview
