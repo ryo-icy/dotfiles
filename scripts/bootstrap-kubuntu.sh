@@ -36,6 +36,7 @@ units=(
   "09-chsh.sh"
   "10-kubeconfig.sh"
   "11-intel-vaapi.sh"
+  "12-wayland.sh"
 )
 
 total=${#units[@]}
