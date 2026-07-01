@@ -33,6 +33,8 @@ bash scripts/bootstrap-kubuntu.sh
 
 `bootstrap-kubuntu.sh` は、既存設定のバックアップ、Docker / Nix / Home Manager の導入、公開鍵と kubeconfig の再配置までを順に実行します。1Password SSH Agent は 1Password for Linux デスクトップアプリ経由で利用するため、事前に「設定 → デベロッパー → SSH Agent」を有効にしておいてください。
 
+bootstrap 完了後、ログアウトして SDDM のログイン画面でセッション選択を **「Plasma (Wayland)」** に切り替えてください。タッチパッドジェスチャーを含む全設定は Wayland セッションを前提としています。
+
 ### 既存（WSL2）
 
 ```bash
