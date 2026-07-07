@@ -4,20 +4,49 @@
 # 拒否ルール (Deny) - 優先度 300
 # ==========================================
 
-# シェルコマンド (拒否)
 [[rule]]
 toolName = "run_shell_command"
-commandPrefix = "rm -rf"
+commandPrefix = "git reset"
 decision = "deny"
 priority = 300
-denyMessage = "セキュリティ上の理由から、再帰的な削除 (rm -rf) は禁止されています。"
+denyMessage = "git reset は禁止されています。"
 
 [[rule]]
 toolName = "run_shell_command"
-commandPrefix = "sudo"
+commandPrefix = "rtk git reset"
 decision = "deny"
 priority = 300
-denyMessage = "セキュリティ上の理由から、sudo 権限が必要な操作は禁止されています。"
+denyMessage = "git reset は禁止されています。"
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "op "
+decision = "deny"
+priority = 300
+
+[[rule]]
+toolName = "run_shell_command"
+argsPattern = "cat .*\.env.*"
+decision = "deny"
+priority = 301
+
+[[rule]]
+toolName = "run_shell_command"
+argsPattern = "rtk cat .*\.env.*"
+decision = "deny"
+priority = 301
+
+[[rule]]
+toolName = "run_shell_command"
+argsPattern = "cat ~/.kube/config"
+decision = "deny"
+priority = 301
+
+[[rule]]
+toolName = "run_shell_command"
+argsPattern = "rtk cat ~/.kube/config"
+decision = "deny"
+priority = 301
 
 [[rule]]
 toolName = "run_shell_command"
@@ -35,32 +64,25 @@ denyMessage = "環境変数の表示は禁止されています。"
 
 [[rule]]
 toolName = "run_shell_command"
-commandPrefix = "git reset"
+commandPrefix = "rm -rf"
 decision = "deny"
 priority = 300
-denyMessage = "git reset は禁止されています。"
+denyMessage = "セキュリティ上の理由から、再帰的な削除 (rm -rf) は禁止されています。"
 
 [[rule]]
 toolName = "run_shell_command"
-commandPrefix = "rtk git reset"
+commandPrefix = "rtk rm -rf"
 decision = "deny"
 priority = 300
-denyMessage = "git reset は禁止されています。"
-
-# 秘密情報の cat 拒否
-[[rule]]
-toolName = "run_shell_command"
-argsPattern = "cat .*\.env.*"
-decision = "deny"
-priority = 301
+denyMessage = "セキュリティ上の理由から、再帰的な削除 (rm -rf) は禁止されています。"
 
 [[rule]]
 toolName = "run_shell_command"
-argsPattern = "cat ~/.kube/config"
+commandPrefix = "sudo "
 decision = "deny"
-priority = 301
+priority = 300
+denyMessage = "セキュリティ上の理由から、sudo 権限が必要な操作は禁止されています。"
 
-# 秘密情報の read_file 拒否
 [[rule]]
 toolName = "read_file"
 filePattern = ".*\.env.*"
@@ -73,61 +95,32 @@ filePattern = "~/.kube/config"
 decision = "deny"
 priority = 300
 
-# 1Password SSH 鍵やシークレット操作の拒否
-[[rule]]
-toolName = "run_shell_command"
-commandPrefix = "op "
-decision = "deny"
-priority = 300
-
-# ==========================================
-# 承認要求ルール (Ask) - 優先度 200
-# ==========================================
-
-[[rule]]
-toolName = "run_shell_command"
-commandPrefix = "rm "
-decision = "ask_user"
-priority = 200
-
-[[rule]]
-toolName = "run_shell_command"
-commandPrefix = "wget "
-decision = "ask_user"
-priority = 200
-
-[[rule]]
-toolName = "run_shell_command"
-commandPrefix = "curl "
-decision = "ask_user"
-priority = 200
-
-[[rule]]
-toolName = "run_shell_command"
-commandPrefix = "git push"
-decision = "ask_user"
-priority = 200
-
-[[rule]]
-toolName = "run_shell_command"
-commandPrefix = "git rm"
-decision = "ask_user"
-priority = 200
-
-[[rule]]
-toolName = "run_shell_command"
-commandPrefix = "gh pr create"
-decision = "ask_user"
-priority = 200
-
 # ==========================================
 # 許可ルール (Allow) - 優先度 100
 # ==========================================
 
-# 参照系・基本操作
+# git / gh (サンドボックス除外)
 [[rule]]
 toolName = "run_shell_command"
 commandPrefix = "git "
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_unsandboxed_shell_command"
+commandPrefix = "git "
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "rtk git "
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_unsandboxed_shell_command"
+commandPrefix = "rtk git "
 decision = "allow"
 priority = 100
 
@@ -138,11 +131,24 @@ decision = "allow"
 priority = 100
 
 [[rule]]
-toolName = "run_shell_command"
-commandPrefix = "ls"
+toolName = "run_unsandboxed_shell_command"
+commandPrefix = "gh "
 decision = "allow"
 priority = 100
 
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "rtk gh "
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_unsandboxed_shell_command"
+commandPrefix = "rtk gh "
+decision = "allow"
+priority = 100
+
+# その他基本操作
 [[rule]]
 toolName = "run_shell_command"
 commandPrefix = "cat"
@@ -151,7 +157,13 @@ priority = 100
 
 [[rule]]
 toolName = "run_shell_command"
-commandPrefix = "grep"
+commandPrefix = "rtk cat"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "cd "
 decision = "allow"
 priority = 100
 
@@ -163,7 +175,55 @@ priority = 100
 
 [[rule]]
 toolName = "run_shell_command"
+commandPrefix = "rtk find"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "grep"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "rtk grep"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "ls"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "rtk ls"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
 commandPrefix = "mkdir"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "rtk mkdir"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "pwd"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "rtk pwd"
 decision = "allow"
 priority = 100
 
@@ -175,7 +235,31 @@ priority = 100
 
 [[rule]]
 toolName = "run_shell_command"
-commandPrefix = "nix"
+commandPrefix = "rtk home-manager"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "nix "
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "rtk nix "
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "shellcheck"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "rtk shellcheck"
 decision = "allow"
 priority = 100
 
