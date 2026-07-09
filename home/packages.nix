@@ -33,6 +33,7 @@
     mise
     (import ./pkgs/difit.nix { inherit pkgs; })
     (import ./pkgs/mo.nix { inherit pkgs; })
+    (import ./pkgs/leaf.nix { inherit pkgs; })
     (import ./pkgs/herdr.nix { inherit pkgs; })
     (import ./pkgs/hunk.nix { inherit pkgs; })
     gh
