@@ -43,7 +43,6 @@
     # インフラ・クラウド
     kubectl
     argocd
-    terraform
     tflint
     google-cloud-sdk
     google-clasp
