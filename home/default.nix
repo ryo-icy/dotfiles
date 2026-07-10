@@ -4,6 +4,7 @@
     ./llm-agents.nix
     ./shell.nix
     ./git.nix
+    ./hunk.nix
     ./starship.nix
     ./ssh.nix
     (if isWSL then ./wsl.nix else ./kubuntu.nix)
