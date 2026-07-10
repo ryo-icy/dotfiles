@@ -36,6 +36,7 @@
     (import ./pkgs/leaf.nix { inherit pkgs; })
     (import ./pkgs/herdr.nix { inherit pkgs; })
     (import ./pkgs/hunk.nix { inherit pkgs; })
+    (import ./pkgs/hister.nix { inherit pkgs; })
     gh
     ghq
     shellcheck
