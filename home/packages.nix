@@ -35,7 +35,7 @@
     (import ./pkgs/mo.nix { inherit pkgs; })
     (import ./pkgs/leaf.nix { inherit pkgs; })
     (import ./pkgs/herdr.nix { inherit pkgs; })
-    (import ./pkgs/hunk.nix { inherit pkgs; })
+    # hunk は config 管理の都合で home/hunk.nix 側で管理する。
     (import ./pkgs/hister.nix { inherit pkgs; })
     gh
     ghq
