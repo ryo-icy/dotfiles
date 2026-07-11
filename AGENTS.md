@@ -49,7 +49,7 @@
 ### Hister（個人検索エンジン）
 
 - `hister listen` にはデタッチ/デーモンモードがなく、フォアグラウンド常駐前提のため systemd `--user` サービスとして常駐させる（`home/hister.nix`）。
-- Claude Code へのMCP登録（`claude mcp add --transport http --scope user hister http://127.0.0.1:4433/mcp`）はClaude Code自身の実行時状態ファイル（`~/.claude.json`）に書き込まれるため、Nix管理の対象外。新しい端末では手動で再実行する。
+- 各エージェントへのMCP登録（例: Claude Codeなら`claude mcp add --transport http --scope user hister http://127.0.0.1:4433/mcp`）はそのエージェント自身の実行時状態ファイル（Claude Codeなら`~/.claude.json`、Antigravity CLIなら`~/.gemini/`配下等）に書き込まれるため、Nix管理の対象外。新しい端末では各エージェントごとに手動で再登録する。
 - `~/.config/hister/rules.json`（skip/priority/aliases）はWeb UI・API・CLIから随時更新される運用データのため、Codexの`config.toml`と同様にsymlink管理せず直接編集する。
 
 ### Agent Skills
