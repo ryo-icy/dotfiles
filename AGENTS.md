@@ -48,9 +48,9 @@
 
 ### Hister（個人検索エンジン）
 
-- `hister listen` にはデタッチ/デーモンモードがなく、フォアグラウンド常駐前提のため systemd `--user` サービスとして常駐させる（`home/hister.nix`）。
-- 各エージェントへのMCP登録（例: Claude Codeなら`claude mcp add --transport http --scope user hister http://127.0.0.1:4433/mcp`）はそのエージェント自身の実行時状態ファイル（Claude Codeなら`~/.claude.json`、Antigravity CLIなら`~/.gemini/`配下等）に書き込まれるため、Nix管理の対象外。新しい端末では各エージェントごとに手動で再登録する。
-- `~/.config/hister/rules.json`（skip/priority/aliases）はWeb UI・API・CLIから随時更新される運用データのため、Codexの`config.toml`と同様にsymlink管理せず直接編集する。
+- histerサーバーはarcana（Komodoで管理するDockerホスト）上のコンテナとして稼働する。以前はhome-managerのsystemd `--user`サービス（`home/hister.nix`）として常駐させていたが、この構成は撤去済み。サーバーURLは`http://10.0.1.240:4433`固定。
+- 各エージェントへのMCP登録（例: Claude Codeなら`claude mcp add --transport http --scope user hister http://10.0.1.240:4433/mcp`）はそのエージェント自身の実行時状態ファイル（Claude Codeなら`~/.claude.json`、Antigravity CLIなら`~/.gemini/`配下等）に書き込まれるため、Nix管理の対象外。旧URL（`127.0.0.1:4433/mcp`）で登録済みの端末では再登録が必要。
+- `rules.json`（skip/priority/aliases）はarcana側のhisterコンテナが持つ運用データであり、ローカルの`~/.config/hister/rules.json`はもう参照されない。エイリアス等の設定変更はarcana側で行う。
 
 ### Agent Skills
 
