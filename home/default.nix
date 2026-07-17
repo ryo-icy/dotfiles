@@ -15,7 +15,6 @@
     ./yazi.nix
     ./lazygit.nix
     ./tmux.nix
-    ./hister.nix
   ];
 
   home.username = "ryosh";
