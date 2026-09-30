@@ -52,6 +52,12 @@
 - 各エージェントへのMCP登録（例: Claude Codeなら`claude mcp add --transport http --scope user hister http://10.0.1.240:4433/mcp`）はそのエージェント自身の実行時状態ファイル（Claude Codeなら`~/.claude.json`、Antigravity CLIなら`~/.gemini/`配下等）に書き込まれるため、Nix管理の対象外。旧URL（`127.0.0.1:4433/mcp`）で登録済みの端末では再登録が必要。
 - `rules.json`（skip/priority/aliases）はarcana側のhisterコンテナが持つ運用データであり、ローカルの`~/.config/hister/rules.json`はもう参照されない。エイリアス等の設定変更はarcana側で行う。
 
+### Grafana MCP
+
+- `mcp-grafana`（grafana/mcp-grafana）バイナリは `home/packages.nix` で Nix 管理する。nixpkgs収録パッケージのため、hister等と異なり `home/pkgs/` に個別derivationは不要。
+- 各エージェントへのMCP登録（例: Claude Codeなら`claude mcp add grafana --scope user --env GRAFANA_URL=... --env 'GRAFANA_SERVICE_ACCOUNT_TOKEN=${GRAFANA_SERVICE_ACCOUNT_TOKEN}' -- mcp-grafana`）はそのエージェント自身の実行時状態ファイル（Claude Codeなら`~/.claude.json`）に書き込まれるため、Nix管理の対象外。
+- Grafanaのサービスアカウントトークンは`~/.claude.json`に平文で埋め込まず、`${GRAFANA_SERVICE_ACCOUNT_TOKEN}`のようなenv変数展開で参照する。トークン自体は1Passwordで管理し、利用時にシェル環境変数へ読み込む（`scripts/export-ssh-keys.sh`等と同じ1Password運用パターン）。
+
 ### Agent Skills
 
 - 共通スキルの正本は `config/agents/skills/` に置く。
