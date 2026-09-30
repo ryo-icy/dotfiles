@@ -48,6 +48,7 @@
     google-cloud-sdk
     google-clasp
     cloudflared
+    mcp-grafana
 
     # ネットワーク診断・通信
     wget
