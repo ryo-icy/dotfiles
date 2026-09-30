@@ -3,6 +3,14 @@
   "worktreeConfig": {
     "enabled": true
   },
+  "extraKnownMarketplaces": {
+    "grafana-mcp-marketplace": {
+      "source": "/home/ryosh/.claude/grafana-mcp-marketplace"
+    }
+  },
+  "enabledPlugins": {
+    "grafana-mcp@grafana-mcp-marketplace": true
+  },
 "permissions": {
     "defaultMode": "auto",
     "deny": [

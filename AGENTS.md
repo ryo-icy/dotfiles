@@ -55,8 +55,9 @@
 ### Grafana MCP
 
 - `mcp-grafana`（grafana/mcp-grafana）バイナリは `home/packages.nix` で Nix 管理する。nixpkgs収録パッケージのため、hister等と異なり `home/pkgs/` に個別derivationは不要。
-- 各エージェントへのMCP登録（例: Claude Codeなら`claude mcp add grafana --scope user --env GRAFANA_URL=... --env 'GRAFANA_SERVICE_ACCOUNT_TOKEN=${GRAFANA_SERVICE_ACCOUNT_TOKEN}' -- mcp-grafana`）はそのエージェント自身の実行時状態ファイル（Claude Codeなら`~/.claude.json`）に書き込まれるため、Nix管理の対象外。
-- Grafanaのサービスアカウントトークンは`~/.claude.json`に平文で埋め込まず、`${GRAFANA_SERVICE_ACCOUNT_TOKEN}`のようなenv変数展開で参照する。トークン自体は1Passwordで管理し、利用時にシェル環境変数へ読み込む（`scripts/export-ssh-keys.sh`等と同じ1Password運用パターン）。
+- Claude CodeへのMCP登録は`claude mcp add`のような対話的コマンドを使わず、Claude Codeの「プラグイン」機能で宣言的に行う。`home/claude.nix`がローカルマーケットプレイス（`~/.claude/grafana-mcp-marketplace/`、`.claude-plugin/marketplace.json` + `grafana-mcp/.claude-plugin/plugin.json` + `grafana-mcp/.mcp.json`）をNixでビルドし、`config/claude/settings.json`の`extraKnownMarketplaces`/`enabledPlugins`で有効化する。hister・ArgoCD等の「エージェント実行時状態ファイルに書き込むためNix管理対象外」という方針とは異なる、Claude Code固有の例外。
+- GrafanaのURL・サービスアカウントトークンは生成される`.mcp.json`（Nixストアに置かれ world-readable）に直書きせず、`${GRAFANA_URL}` / `${GRAFANA_SERVICE_ACCOUNT_TOKEN}`という変数名の参照だけを書く。Claude Codeが起動時にプロセス環境変数から展開するため、実体は1Password（アイテム名: `Grafana Viewer Access`）で一元管理し、Claude Code起動前にシェルセッションへexportする（コマンドは「変更時の実務メモ」参照）。mcp-grafanaはstdioモードでのブラウザSSO/OAuthログインに対応していないため、この静的トークン方式が唯一の選択肢。
+- Antigravity CLI・Codex等の他エージェントへの登録は同様のプラグイン機構を持たない場合が多く、hister同様に各エージェントの実行時状態ファイルへ手動登録する（Nix管理対象外）。
 
 ### Agent Skills
 
@@ -137,6 +138,13 @@ home-manager switch --flake ".#<設定名>"
 op signin
 bash scripts/export-ssh-keys.sh
 bash scripts/export-kubeconfig.sh
+```
+
+Grafana MCPのURL・トークンをシェルに読み込む（Claude Code起動前にセッションごとに実行。1Password CLI連携が有効なら`op signin`は不要）:
+
+```bash
+export GRAFANA_URL=$(op item get "Grafana Viewer Access" --fields url)
+export GRAFANA_SERVICE_ACCOUNT_TOKEN=$(op item get "Grafana Viewer Access" --fields credential)
 ```
 
 新規端末への Nix trusted-users / cachix 初期設定（bootstrap を実行しない既存環境向け）:
