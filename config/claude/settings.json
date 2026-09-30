@@ -5,7 +5,10 @@
   },
   "extraKnownMarketplaces": {
     "grafana-mcp-marketplace": {
-      "source": "/home/ryosh/.claude/grafana-mcp-marketplace"
+      "source": {
+        "source": "directory",
+        "path": "/home/ryosh/.claude/grafana-mcp-marketplace"
+      }
     }
   },
   "enabledPlugins": {
