@@ -140,12 +140,13 @@ bash scripts/export-ssh-keys.sh
 bash scripts/export-kubeconfig.sh
 ```
 
-Grafana MCPのURL・トークンをシェルに読み込む（Claude Code起動前にセッションごとに実行。1Password CLI連携が有効なら`op signin`は不要）:
+Grafana MCPのURL・トークンをシェルに読み込む（Claude Code起動前にセッションごとに`grafana-env`関数を実行。定義は`home/shell.nix`。1Password CLI連携が有効なら`op signin`は不要）:
 
 ```bash
-export GRAFANA_URL=$(op item get "Grafana Viewer Access" --fields url)
-export GRAFANA_SERVICE_ACCOUNT_TOKEN=$(op item get "Grafana Viewer Access" --fields credential)
+grafana-env
 ```
+
+トークンのフィールドラベルは`credential`ではなく`password`。`--fields`だけだとCONCEALEDフィールドは値の代わりに`[use '... --reveal' to reveal]`という文字列を返すため、`--reveal`を付けないと`GRAFANA_SERVICE_ACCOUNT_TOKEN`にその文字列が入り、Grafana側で401 Invalid API keyになる（`grafana-env`関数はこれを踏まえて実装済み）。
 
 新規端末への Nix trusted-users / cachix 初期設定（bootstrap を実行しない既存環境向け）:
 

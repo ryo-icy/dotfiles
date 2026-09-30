@@ -56,6 +56,14 @@
             cd "$(ghq root)/$selected" || return
           fi
         }
+
+        # Grafana MCP用のURL・トークンを1PasswordからexportしてClaude Codeを起動
+        function grafana-env() {
+          export GRAFANA_URL
+          export GRAFANA_SERVICE_ACCOUNT_TOKEN
+          GRAFANA_URL=$(op item get "Grafana Viewer Access" --format json | jq -r '.urls[0].href') || return
+          GRAFANA_SERVICE_ACCOUNT_TOKEN=$(op item get "Grafana Viewer Access" --fields password --reveal) || return
+        }
       ''
       (lib.optionalString (!isWSL) ''
         # X11/Wayland セッション種別を自動検出してクリップボードへコピー
