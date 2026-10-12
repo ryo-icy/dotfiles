@@ -14,7 +14,7 @@
   "enabledPlugins": {
     "grafana-mcp@grafana-mcp-marketplace": true
   },
-"permissions": {
+  "permissions": {
     "defaultMode": "auto",
     "deny": [
       "Bash(git reset*)",
@@ -47,7 +47,6 @@
       "Bash(rtk curl * | bash*)",
       "Read(.env*)",
       "Read(~/.kube/config)",
-      "Write(.env*)",
       "Edit(.env*)"
     ],
     "allow": [
