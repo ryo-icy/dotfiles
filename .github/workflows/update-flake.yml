@@ -33,4 +33,5 @@ jobs:
         with:
           input-name: ${{ matrix.input-name }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          minimum-release-age-days: 3
+          # llm-agents は上流が高頻度にコミットするため、3日ルールだと常に「too fresh」でPRが作られない
+          minimum-release-age-days: ${{ matrix.input-name == 'llm-agents' && '0' || '3' }}
