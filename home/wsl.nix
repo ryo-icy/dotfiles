@@ -12,17 +12,40 @@
   # Requires: socat (in packages.nix) and ~/.local/bin/npiperelay.exe (installed by bootstrap.sh).
   home.sessionVariables.SSH_AUTH_SOCK = "/tmp/ssh-agent-1p.sock";
 
+  # 起動レース対策:
+  # - flock で起動処理を排他にし、複数シェルの同時起動で稼働中のソケットを消し合わない
+  # - ソケットファイルの存在ではなく socat プロセスの生存で判定し、socat が死んで
+  #   ソケットだけ残った状態(stale)も復旧する
+  # - 起動後、ソケットができるまで短時間待ってから戻る
   programs.zsh.initContent = lib.mkAfter ''
-    _1P_SOCK="/tmp/ssh-agent-1p.sock"
-    _RELAY="$HOME/.local/bin/npiperelay.exe"
-    if [[ ! -S "$_1P_SOCK" ]] && [[ -f "$_RELAY" ]]; then
-      rm -f "$_1P_SOCK"
-      (setsid socat \
-        UNIX-LISTEN:"$_1P_SOCK",fork \
-        EXEC:"$_RELAY -ei -s //./pipe/openssh-ssh-agent",nofork \
-        &>/dev/null &)
-    fi
-    unset _1P_SOCK _RELAY
+    _1p_ssh_bridge() {
+      local sock="/tmp/ssh-agent-1p.sock"
+      local relay="$HOME/.local/bin/npiperelay.exe"
+      local lock="/tmp/ssh-agent-1p.lock"
+      local pat="UNIX-LISTEN:$sock"
+      [[ -f "$relay" ]] || return 0
+      _1p_alive() { [[ -S "$sock" ]] && pgrep -u "$UID" -f "$pat" >/dev/null; }
+      _1p_alive && { unset -f _1p_alive; return 0; }
+      (
+        flock -w 5 9 || exit 0
+        _1p_alive && exit 0
+        pkill -u "$UID" -f "$pat" 2>/dev/null
+        rm -f "$sock"
+        # fd 9 を socat に引き継ぐとロックが解放されないため閉じる
+        setsid socat \
+          UNIX-LISTEN:"$sock",fork \
+          EXEC:"$relay -ei -s //./pipe/openssh-ssh-agent",nofork \
+          9>&- &>/dev/null &
+        local i
+        for i in {1..30}; do
+          [[ -S "$sock" ]] && break
+          sleep 0.1
+        done
+      ) 9>"$lock"
+      unset -f _1p_alive
+    }
+    _1p_ssh_bridge
+    unset -f _1p_ssh_bridge
   '';
 
   # Ensure ~/.local/bin (npiperelay.exe) is on PATH
