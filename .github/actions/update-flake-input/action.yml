@@ -99,4 +99,4 @@ runs:
         git commit -m "$TITLE"
         git push -f origin "$BRANCH"
 
-        gh pr create --title "$TITLE" --body "$BODY" --head "$BRANCH" --base main || gh pr edit "$BRANCH" --title "$TITLE" --body "$BODY"
+        gh pr create --title "$TITLE" --body "$BODY" --head "$BRANCH" --base main --reviewer ryo-icy || gh pr edit "$BRANCH" --title "$TITLE" --body "$BODY" --add-reviewer ryo-icy
